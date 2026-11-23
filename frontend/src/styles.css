@@ -1,7 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
-
 :root {
-  font-family: Inter, 'Noto Sans KR', system-ui, sans-serif;
+  font-family: Inter, Pretendard, 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
   color: #17171d;
   background: #f6f5f1;
   font-synthesis: none;
@@ -106,6 +104,7 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
 .modal > label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 700; }
 .modal textarea { width: 100%; padding: 13px; border: 1px solid #cccbd2; border-radius: 11px; resize: vertical; line-height: 1.55; }
 .modal-close { position: absolute; right: 17px; top: 17px; width: 36px; height: 36px; border: 0; border-radius: 10px; background: #f2f1ed; cursor: pointer; font-size: 20px; }
+.modal-close:disabled { opacity: .45; cursor: not-allowed; }
 .bulk-summary { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; color: var(--muted); font-size: 11px; }
 .modal-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 8px; }
 .field-error { margin: 7px 0 0 !important; color: #ffb5c1 !important; font-size: 12px !important; }
@@ -116,6 +115,11 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
 .no-results p { color: var(--muted); }
 .sync-message { max-width: 1180px; margin: 16px auto 0; color: var(--muted); text-align: right; font-size: 11px; }
 .sync-message.error { color: var(--danger); font-weight: 700; }
+.fatal-error { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 28px; text-align: center; }
+.fatal-error > span { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: #fff0f2; color: var(--danger); font-size: 30px; font-weight: 800; }
+.fatal-error h1, .fatal-error p { margin: 0; }
+.fatal-error p { max-width: 480px; color: var(--muted); line-height: 1.6; }
+.fatal-error .button { margin-top: 8px; }
 
 @media (max-width: 940px) { .board-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); } .composer { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {

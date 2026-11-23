@@ -14,4 +14,9 @@ describe('local board storage', () => {
     localStorage.setItem('idea-hub.board.v1', '{broken')
     expect(loadBoard().ideas.length).toBeGreaterThan(0)
   })
+
+  it('recovers from JSON with an invalid board shape', () => {
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify({ id: 'bad', title: 'bad', ideas: [{ id: 'missing-fields', text: 'bad' }], groups: [] }))
+    expect(loadBoard().id).toBe('local-board')
+  })
 })

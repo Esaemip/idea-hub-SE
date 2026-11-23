@@ -106,6 +106,25 @@ export const filterIdeas = (ideas: Idea[], filter: FilterState): Idea[] => {
   })
 }
 
+export const mergeRemoteBoard = (remote: Board, local: Board): Board => {
+  const localFavorites = new Map(
+    local.ideas
+      .filter((idea): idea is Idea & { serverId: number } => idea.serverId !== undefined)
+      .map((idea) => [idea.serverId, idea.favorite]),
+  )
+  return {
+    ...remote,
+    groups: [...remote.groups, ...local.groups.filter((group) => group.serverId === undefined)],
+    ideas: [
+      ...remote.ideas.map((idea) => ({
+        ...idea,
+        favorite: idea.serverId === undefined ? idea.favorite : (localFavorites.get(idea.serverId) ?? false),
+      })),
+      ...local.ideas.filter((idea) => idea.serverId === undefined),
+    ],
+  }
+}
+
 export type BoardAction =
   | { type: 'hydrate'; board: Board }
   | { type: 'ideas/add'; ideas: Idea[] }

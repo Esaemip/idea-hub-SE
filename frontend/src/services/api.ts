@@ -24,6 +24,7 @@ interface RemoteBoard {
 }
 
 const palette = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
+const REQUEST_TIMEOUT_MS = 10_000
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -32,10 +33,23 @@ export class ApiError extends Error {
 }
 
 const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(`${baseUrl}${path}`, {
-    ...init,
-    headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
-  })
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let response: Response
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      signal: init?.signal ?? controller.signal,
+      headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
+    })
+  } catch (error) {
+    const message = error instanceof DOMException && error.name === 'AbortError'
+      ? '서버 응답 시간이 초과됐어요.'
+      : '서버에 연결할 수 없어요.'
+    throw new ApiError(message, 0)
+  } finally {
+    window.clearTimeout(timeout)
+  }
   if (!response.ok) {
     let message = '서버 요청을 처리하지 못했어요.'
     try {
@@ -65,6 +79,7 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
   return {
     async loadBoard() {
       const remote = await request<RemoteBoard>(base, `/boards/${boardId}`)
+      if (!Array.isArray(remote.groups) || !Array.isArray(remote.ideas)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
       const groups: IdeaGroup[] = remote.groups.map((group, index) => ({
         id: `server-group-${group.id}`,
         serverId: group.id,

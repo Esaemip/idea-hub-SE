@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { createStarterBoard } from './domain/board'
+import { saveBoard } from './services/storage'
 
 describe('Idea Hub card flows', () => {
   it('creates, searches and favorites a card', async () => {
@@ -23,6 +25,26 @@ describe('Idea Hub card flows', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(screen.getByText('일괄 아이디어 A')).toBeInTheDocument()
     expect(screen.getByText('일괄 아이디어 B')).toBeInTheDocument()
+  })
+
+  it('closes the bulk dialog with Escape and returns focus to its opener', async () => {
+    const user = userEvent.setup(); render(<App />)
+    const opener = screen.getByRole('button', { name: '여러 개 입력' })
+    await user.click(opener)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(opener).toHaveFocus()
+  })
+
+  it('shows the empty board instead of a no-results error when there are no cards', () => {
+    const board = createStarterBoard()
+    board.ideas = []
+    saveBoard(board)
+    render(<App />)
+    expect(screen.getByLabelText('아이디어 그룹 보드')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '새 그룹 만들기' })).toBeInTheDocument()
+    expect(screen.queryByText('조건에 맞는 아이디어가 없어요')).not.toBeInTheDocument()
   })
 
   it('edits, moves and deletes a card', async () => {

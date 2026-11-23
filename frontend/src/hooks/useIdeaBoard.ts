@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
-import { boardReducer, createGroup, createIdea } from '../domain/board'
+import { boardReducer, createGroup, createIdea, mergeRemoteBoard } from '../domain/board'
 import { createApiClient, type ApiClient } from '../services/api'
 import { loadBoard, saveBoard } from '../services/storage'
 import type { Idea, SyncState } from '../types'
@@ -12,11 +12,21 @@ const makeClient = (): ApiClient | null => hasRemoteConfiguration ? createApiCli
 
 export const useIdeaBoard = () => {
   const [board, dispatch] = useReducer(boardReducer, undefined, loadBoard)
-  const [syncState, setSyncState] = useState<SyncState>(hasRemoteConfiguration ? 'synced' : 'local')
-  const [syncMessage, setSyncMessage] = useState('이 브라우저에 자동 저장됩니다.')
-  const client = useMemo(makeClient, [])
+  const [syncState, setSyncState] = useState<SyncState>('local')
+  const [syncMessage, setSyncMessage] = useState(hasRemoteConfiguration ? '서버 연결이 설정됐습니다. 필요할 때 최신 데이터를 불러오세요.' : '이 브라우저에 자동 저장됩니다.')
+  const client = useMemo(() => makeClient(), [])
 
-  useEffect(() => { saveBoard(board) }, [board])
+  useEffect(() => {
+    try {
+      saveBoard(board)
+    } catch {
+      const messageTimer = window.setTimeout(() => {
+        setSyncState('error')
+        setSyncMessage('브라우저 저장 공간에 기록하지 못했어요. 중요한 내용을 복사해 두고 저장 공간을 확인해 주세요.')
+      }, 0)
+      return () => window.clearTimeout(messageTimer)
+    }
+  }, [board])
 
   const remoteTask = useCallback(async (task: (api: ApiClient) => Promise<void>) => {
     if (!client) return
@@ -85,14 +95,15 @@ export const useIdeaBoard = () => {
     setSyncState('syncing')
     setSyncMessage('서버 데이터를 불러오는 중…')
     try {
-      dispatch({ type: 'hydrate', board: await client.loadBoard() })
+      const remote = await client.loadBoard()
+      dispatch({ type: 'hydrate', board: mergeRemoteBoard(remote, board) })
       setSyncState('synced')
       setSyncMessage('서버의 최신 보드를 불러왔습니다.')
     } catch (error) {
       setSyncState('error')
       setSyncMessage(error instanceof Error ? error.message : '서버 데이터를 불러오지 못했습니다.')
     }
-  }, [client])
+  }, [board, client])
 
   return { board, syncState, syncMessage, remoteEnabled: Boolean(client), addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, reloadRemote }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { boardReducer, createGroup, createIdea, createStarterBoard, filterIdeas, parseBulkIdeas } from './board'
+import { boardReducer, createGroup, createIdea, createStarterBoard, filterIdeas, mergeRemoteBoard, parseBulkIdeas } from './board'
 
 describe('parseBulkIdeas', () => {
   it('removes blank lines and duplicates', () => {
@@ -38,5 +38,24 @@ describe('filterIdeas', () => {
     const ideas = board.ideas.map((idea, index) => index === 0 ? { ...idea, favorite: true } : idea)
     expect(filterIdeas(ideas, { query: '메인', groupId, favoritesOnly: true })).toHaveLength(1)
     expect(filterIdeas(ideas, { query: '없음', groupId: 'all', favoritesOnly: false })).toHaveLength(0)
+  })
+})
+
+describe('mergeRemoteBoard', () => {
+  it('preserves unsynced local work and favorites when refreshing from the server', () => {
+    const local = createStarterBoard()
+    local.ideas[0] = { ...local.ideas[0], serverId: 11, favorite: true }
+    const localOnlyIdea = createIdea('아직 서버에 없는 카드')
+    local.ideas.push(localOnlyIdea)
+
+    const remote = createStarterBoard()
+    remote.ideas = [{ ...remote.ideas[0], id: 'server-idea-11', serverId: 11, favorite: false }]
+    remote.groups = remote.groups.map((group, index) => ({ ...group, serverId: index + 1 }))
+
+    const merged = mergeRemoteBoard(remote, local)
+
+    expect(merged.ideas.find((idea) => idea.serverId === 11)?.favorite).toBe(true)
+    expect(merged.ideas).toContainEqual(localOnlyIdea)
+    expect(merged.groups).toEqual(expect.arrayContaining(local.groups.filter((group) => group.serverId === undefined)))
   })
 })

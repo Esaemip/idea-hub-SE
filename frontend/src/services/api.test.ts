@@ -13,4 +13,12 @@ describe('createApiClient', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ detail: '아이디어를 찾을 수 없습니다.' }), { status: 404, headers: { 'Content-Type': 'application/json' } }))
     await expect(createApiClient('http://localhost:8000', 1).updateIdea(99, '수정')).rejects.toEqual(new ApiError('아이디어를 찾을 수 없습니다.', 404))
   })
+  it('turns connection failures into a readable error', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('network down'))
+    await expect(createApiClient('http://localhost:8000', 1).loadBoard()).rejects.toEqual(new ApiError('서버에 연결할 수 없어요.', 0))
+  })
+  it('rejects malformed board responses', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 1, title: '보드', groups: null, ideas: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    await expect(createApiClient('http://localhost:8000', 1).loadBoard()).rejects.toEqual(new ApiError('서버 응답 형식이 올바르지 않아요.', 502))
+  })
 })
