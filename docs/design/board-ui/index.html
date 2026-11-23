@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea hub — 메모 보드 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+@keyframes ihFade{from{opacity:0}to{opacity:1}}
+@keyframes ihSpin{to{transform:rotate(360deg)}}
+@keyframes ihStick{0%{transform:scale(0.9)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+</style>
+<script>
+/* htm (Apache-2.0, LICENSE-htm.txt) + Preact (MIT, Copyright (c) 2015-present Jason Miller) — 파일 하나로 열리도록 그대로 넣었어요 */
+!function(e,n){"object"==typeof exports&&"undefined"!=typeof module?n(exports):"function"==typeof define&&define.amd?define(["exports"],n):n(e.htmPreact={})}(this,function(e){var n,_,t,o,r,u,l,i={},c=[],f=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function s(e,n){for(var _ in n)e[_]=n[_];return e}function a(e){var n=e.parentNode;n&&n.removeChild(e)}function p(e,_,t){var o,r,u,l={};for(u in _)"key"==u?o=_[u]:"ref"==u?r=_[u]:l[u]=_[u];if(arguments.length>2&&(l.children=arguments.length>3?n.call(arguments,2):t),"function"==typeof e&&null!=e.defaultProps)for(u in e.defaultProps)void 0===l[u]&&(l[u]=e.defaultProps[u]);return h(e,l,o,r,null)}function h(e,n,o,r,u){var l={type:e,props:n,key:o,ref:r,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==u?++t:u};return null!=_.vnode&&_.vnode(l),l}function d(e){return e.children}function v(e,n){this.props=e,this.context=n}function y(e,n){if(null==n)return e.__?y(e.__,e.__.__k.indexOf(e)+1):null;for(var _;n<e.__k.length;n++)if(null!=(_=e.__k[n])&&null!=_.__e)return _.__e;return"function"==typeof e.type?y(e):null}function m(e){var n,_;if(null!=(e=e.__)&&null!=e.__c){for(e.__e=e.__c.base=null,n=0;n<e.__k.length;n++)if(null!=(_=e.__k[n])&&null!=_.__e){e.__e=e.__c.base=_.__e;break}return m(e)}}function g(e){(!e.__d&&(e.__d=!0)&&o.push(e)&&!k.__r++||u!==_.debounceRendering)&&((u=_.debounceRendering)||r)(k)}function k(){for(var e;k.__r=o.length;)e=o.sort(function(e,n){return e.__v.__b-n.__v.__b}),o=[],e.some(function(e){var n,_,t,o,r,u;e.__d&&(r=(o=(n=e).__v).__e,(u=n.__P)&&(_=[],(t=s({},o)).__v=o.__v+1,D(u,o,t,n.__n,void 0!==u.ownerSVGElement,null!=o.__h?[r]:null,_,null==r?y(o):r,o.__h),w(_,o),o.__e!=r&&m(o)))})}function b(e,n,_,t,o,r,u,l,f,s){var a,p,v,m,g,k,b,H=t&&t.__k||c,E=H.length;for(_.__k=[],a=0;a<n.length;a++)if(null!=(m=_.__k[a]=null==(m=n[a])||"boolean"==typeof m?null:"string"==typeof m||"number"==typeof m||"bigint"==typeof m?h(null,m,null,null,m):Array.isArray(m)?h(d,{children:m},null,null,null):m.__b>0?h(m.type,m.props,m.key,null,m.__v):m)){if(m.__=_,m.__b=_.__b+1,null===(v=H[a])||v&&m.key==v.key&&m.type===v.type)H[a]=void 0;else for(p=0;p<E;p++){if((v=H[p])&&m.key==v.key&&m.type===v.type){H[p]=void 0;break}v=null}D(e,m,v=v||i,o,r,u,l,f,s),g=m.__e,(p=m.ref)&&v.ref!=p&&(b||(b=[]),v.ref&&b.push(v.ref,null,m),b.push(p,m.__c||g,m)),null!=g?(null==k&&(k=g),"function"==typeof m.type&&null!=m.__k&&m.__k===v.__k?m.__d=f=C(m,f,e):f=x(e,m,v,H,g,f),s||"option"!==_.type?"function"==typeof _.type&&(_.__d=f):e.value=""):f&&v.__e==f&&f.parentNode!=e&&(f=y(v))}for(_.__e=k,a=E;a--;)null!=H[a]&&("function"==typeof _.type&&null!=H[a].__e&&H[a].__e==_.__d&&(_.__d=y(t,a+1)),A(H[a],H[a]));if(b)for(a=0;a<b.length;a++)U(b[a],b[++a],b[++a])}function C(e,n,_){var t,o;for(t=0;t<e.__k.length;t++)(o=e.__k[t])&&(o.__=e,n="function"==typeof o.type?C(o,n,_):x(_,o,o,e.__k,o.__e,n));return n}function x(e,n,_,t,o,r){var u,l,i;if(void 0!==n.__d)u=n.__d,n.__d=void 0;else if(null==_||o!=r||null==o.parentNode)e:if(null==r||r.parentNode!==e)e.appendChild(o),u=null;else{for(l=r,i=0;(l=l.nextSibling)&&i<t.length;i+=2)if(l==o)break e;e.insertBefore(o,r),u=r}return void 0!==u?u:o.nextSibling}function H(e,n,_){"-"===n[0]?e.setProperty(n,_):e[n]=null==_?"":"number"!=typeof _||f.test(n)?_:_+"px"}function E(e,n,_,t,o){var r;e:if("style"===n)if("string"==typeof _)e.style.cssText=_;else{if("string"==typeof t&&(e.style.cssText=t=""),t)for(n in t)_&&n in _||H(e.style,n,"");if(_)for(n in _)t&&_[n]===t[n]||H(e.style,n,_[n])}else if("o"===n[0]&&"n"===n[1])r=n!==(n=n.replace(/Capture$/,"")),n=n.toLowerCase()in e?n.toLowerCase().slice(2):n.slice(2),e.l||(e.l={}),e.l[n+r]=_,_?t||e.addEventListener(n,r?S:P,r):e.removeEventListener(n,r?S:P,r);else if("dangerouslySetInnerHTML"!==n){if(o)n=n.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==n&&"list"!==n&&"form"!==n&&"tabIndex"!==n&&"download"!==n&&n in e)try{e[n]=null==_?"":_;break e}catch(e){}"function"==typeof _||(null!=_&&(!1!==_||"a"===n[0]&&"r"===n[1])?e.setAttribute(n,_):e.removeAttribute(n))}}function P(e){this.l[e.type+!1](_.event?_.event(e):e)}function S(e){this.l[e.type+!0](_.event?_.event(e):e)}function D(e,n,t,o,r,u,l,i,c){var f,a,p,h,y,m,g,k,C,x,H,E=n.type;if(void 0!==n.constructor)return null;null!=t.__h&&(c=t.__h,i=n.__e=t.__e,n.__h=null,u=[i]),(f=_.__b)&&f(n);try{e:if("function"==typeof E){if(k=n.props,C=(f=E.contextType)&&o[f.__c],x=f?C?C.props.value:f.__:o,t.__c?g=(a=n.__c=t.__c).__=a.__E:("prototype"in E&&E.prototype.render?n.__c=a=new E(k,x):(n.__c=a=new v(k,x),a.constructor=E,a.render=M),C&&C.sub(a),a.props=k,a.state||(a.state={}),a.context=x,a.__n=o,p=a.__d=!0,a.__h=[]),null==a.__s&&(a.__s=a.state),null!=E.getDerivedStateFromProps&&(a.__s==a.state&&(a.__s=s({},a.__s)),s(a.__s,E.getDerivedStateFromProps(k,a.__s))),h=a.props,y=a.state,p)null==E.getDerivedStateFromProps&&null!=a.componentWillMount&&a.componentWillMount(),null!=a.componentDidMount&&a.__h.push(a.componentDidMount);else{if(null==E.getDerivedStateFromProps&&k!==h&&null!=a.componentWillReceiveProps&&a.componentWillReceiveProps(k,x),!a.__e&&null!=a.shouldComponentUpdate&&!1===a.shouldComponentUpdate(k,a.__s,x)||n.__v===t.__v){a.props=k,a.state=a.__s,n.__v!==t.__v&&(a.__d=!1),a.__v=n,n.__e=t.__e,n.__k=t.__k,n.__k.forEach(function(e){e&&(e.__=n)}),a.__h.length&&l.push(a);break e}null!=a.componentWillUpdate&&a.componentWillUpdate(k,a.__s,x),null!=a.componentDidUpdate&&a.__h.push(function(){a.componentDidUpdate(h,y,m)})}a.context=x,a.props=k,a.state=a.__s,(f=_.__r)&&f(n),a.__d=!1,a.__v=n,a.__P=e,f=a.render(a.props,a.state,a.context),a.state=a.__s,null!=a.getChildContext&&(o=s(s({},o),a.getChildContext())),p||null==a.getSnapshotBeforeUpdate||(m=a.getSnapshotBeforeUpdate(h,y)),H=null!=f&&f.type===d&&null==f.key?f.props.children:f,b(e,Array.isArray(H)?H:[H],n,t,o,r,u,l,i,c),a.base=n.__e,n.__h=null,a.__h.length&&l.push(a),g&&(a.__E=a.__=null),a.__e=!1}else null==u&&n.__v===t.__v?(n.__k=t.__k,n.__e=t.__e):n.__e=T(t.__e,n,t,o,r,u,l,c);(f=_.diffed)&&f(n)}catch(e){n.__v=null,(c||null!=u)&&(n.__e=i,n.__h=!!c,u[u.indexOf(i)]=null),_.__e(e,n,t)}}function w(e,n){_.__c&&_.__c(n,e),e.some(function(n){try{e=n.__h,n.__h=[],e.some(function(e){e.call(n)})}catch(e){_.__e(e,n.__v)}})}function T(e,_,t,o,r,u,l,c){var f,s,p,h=t.props,d=_.props,v=_.type,m=0;if("svg"===v&&(r=!0),null!=u)for(;m<u.length;m++)if((f=u[m])&&(f===e||(v?f.localName==v:3==f.nodeType))){e=f,u[m]=null;break}if(null==e){if(null===v)return document.createTextNode(d);e=r?document.createElementNS("http://www.w3.org/2000/svg",v):document.createElement(v,d.is&&d),u=null,c=!1}if(null===v)h===d||c&&e.data===d||(e.data=d);else{if(u=u&&n.call(e.childNodes),s=(h=t.props||i).dangerouslySetInnerHTML,p=d.dangerouslySetInnerHTML,!c){if(null!=u)for(h={},m=0;m<e.attributes.length;m++)h[e.attributes[m].name]=e.attributes[m].value;(p||s)&&(p&&(s&&p.__html==s.__html||p.__html===e.innerHTML)||(e.innerHTML=p&&p.__html||""))}if(function(e,n,_,t,o){var r;for(r in _)"children"===r||"key"===r||r in n||E(e,r,null,_[r],t);for(r in n)o&&"function"!=typeof n[r]||"children"===r||"key"===r||"value"===r||"checked"===r||_[r]===n[r]||E(e,r,n[r],_[r],t)}(e,d,h,r,c),p)_.__k=[];else if(m=_.props.children,b(e,Array.isArray(m)?m:[m],_,t,o,r&&"foreignObject"!==v,u,l,u?u[0]:t.__k&&y(t,0),c),null!=u)for(m=u.length;m--;)null!=u[m]&&a(u[m]);c||("value"in d&&void 0!==(m=d.value)&&(m!==e.value||"progress"===v&&!m)&&E(e,"value",m,h.value,!1),"checked"in d&&void 0!==(m=d.checked)&&m!==e.checked&&E(e,"checked",m,h.checked,!1))}return e}function U(e,n,t){try{"function"==typeof e?e(n):e.current=n}catch(e){_.__e(e,t)}}function A(e,n,t){var o,r;if(_.unmount&&_.unmount(e),(o=e.ref)&&(o.current&&o.current!==e.__e||U(o,null,n)),null!=(o=e.__c)){if(o.componentWillUnmount)try{o.componentWillUnmount()}catch(e){_.__e(e,n)}o.base=o.__P=null}if(o=e.__k)for(r=0;r<o.length;r++)o[r]&&A(o[r],n,"function"!=typeof e.type);t||null==e.__e||a(e.__e),e.__e=e.__d=void 0}function M(e,n,_){return this.constructor(e,_)}n=c.slice,_={__e:function(e,n){for(var _,t,o;n=n.__;)if((_=n.__c)&&!_.__)try{if((t=_.constructor)&&null!=t.getDerivedStateFromError&&(_.setState(t.getDerivedStateFromError(e)),o=_.__d),null!=_.componentDidCatch&&(_.componentDidCatch(e),o=_.__d),o)return _.__E=_}catch(n){e=n}throw e}},t=0,v.prototype.setState=function(e,n){var _;_=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=s({},this.state),"function"==typeof e&&(e=e(s({},_),this.props)),e&&s(_,e),null!=e&&this.__v&&(n&&this.__h.push(n),g(this))},v.prototype.forceUpdate=function(e){this.__v&&(this.__e=!0,e&&this.__h.push(e),g(this))},v.prototype.render=d,o=[],r="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,k.__r=0,l=0;var F,L,N,W=0,R=[],I=_.__b,O=_.__r,V=_.diffed,q=_.__c,B=_.unmount;function $(e,n){_.__h&&_.__h(L,e,W||n),W=0;var t=L.__H||(L.__H={__:[],__h:[]});return e>=t.__.length&&t.__.push({}),t.__[e]}function j(e){return W=1,G(ee,e)}function G(e,n,_){var t=$(F++,2);return t.t=e,t.__c||(t.__=[_?_(n):ee(void 0,n),function(e){var n=t.t(t.__[0],e);t.__[0]!==n&&(t.__=[n,t.__[1]],t.__c.setState({}))}],t.__c=L),t.__}function z(e,n){var t=$(F++,4);!_.__s&&Z(t.__H,n)&&(t.__=e,t.__H=n,L.__h.push(t))}function J(e,n){var _=$(F++,7);return Z(_.__H,n)&&(_.__=e(),_.__H=n,_.__h=e),_.__}function K(){R.forEach(function(e){if(e.__P)try{e.__H.__h.forEach(X),e.__H.__h.forEach(Y),e.__H.__h=[]}catch(n){e.__H.__h=[],_.__e(n,e.__v)}}),R=[]}_.__b=function(e){L=null,I&&I(e)},_.__r=function(e){O&&O(e),F=0;var n=(L=e.__c).__H;n&&(n.__h.forEach(X),n.__h.forEach(Y),n.__h=[])},_.diffed=function(e){V&&V(e);var n=e.__c;n&&n.__H&&n.__H.__h.length&&(1!==R.push(n)&&N===_.requestAnimationFrame||((N=_.requestAnimationFrame)||function(e){var n,_=function(){clearTimeout(t),Q&&cancelAnimationFrame(n),setTimeout(e)},t=setTimeout(_,100);Q&&(n=requestAnimationFrame(_))})(K)),L=void 0},_.__c=function(e,n){n.some(function(e){try{e.__h.forEach(X),e.__h=e.__h.filter(function(e){return!e.__||Y(e)})}catch(t){n.some(function(e){e.__h&&(e.__h=[])}),n=[],_.__e(t,e.__v)}}),q&&q(e,n)},_.unmount=function(e){B&&B(e);var n=e.__c;if(n&&n.__H)try{n.__H.__.forEach(X)}catch(e){_.__e(e,n.__v)}};var Q="function"==typeof requestAnimationFrame;function X(e){var n=L;"function"==typeof e.__c&&e.__c(),L=n}function Y(e){var n=L;e.__c=e.__(),L=n}function Z(e,n){return!e||e.length!==n.length||n.some(function(n,_){return n!==e[_]})}function ee(e,n){return"function"==typeof n?n(e):n}var ne=function(e,n,_,t){var o;n[0]=0;for(var r=1;r<n.length;r++){var u=n[r++],l=n[r]?(n[0]|=u?1:2,_[n[r++]]):n[++r];3===u?t[0]=l:4===u?t[1]=Object.assign(t[1]||{},l):5===u?(t[1]=t[1]||{})[n[++r]]=l:6===u?t[1][n[++r]]+=l+"":u?(o=e.apply(l,ne(e,l,_,["",null])),t.push(o),l[0]?n[0]|=2:(n[r-2]=0,n[r]=o)):t.push(l)}return t},_e=new Map,te=function(e){var n=_e.get(this);return n||(n=new Map,_e.set(this,n)),(n=ne(this,n.get(e)||(n.set(e,n=function(e){for(var n,_,t=1,o="",r="",u=[0],l=function(e){1===t&&(e||(o=o.replace(/^\s*\n\s*|\s*\n\s*$/g,"")))?u.push(0,e,o):3===t&&(e||o)?(u.push(3,e,o),t=2):2===t&&"..."===o&&e?u.push(4,e,0):2===t&&o&&!e?u.push(5,0,!0,o):t>=5&&((o||!e&&5===t)&&(u.push(t,0,o,_),t=6),e&&(u.push(t,e,0,_),t=6)),o=""},i=0;i<e.length;i++){i&&(1===t&&l(),l(i));for(var c=0;c<e[i].length;c++)n=e[i][c],1===t?"<"===n?(l(),u=[u],t=3):o+=n:4===t?"--"===o&&">"===n?(t=1,o=""):o=n+o[0]:r?n===r?r="":o+=n:'"'===n||"'"===n?r=n:">"===n?(l(),t=1):t&&("="===n?(t=5,_=o,o=""):"/"===n&&(t<5||">"===e[i][c+1])?(l(),3===t&&(u=u[0]),t=u,(u=u[0]).push(2,0,t),t=0):" "===n||"\t"===n||"\n"===n||"\r"===n?(l(),t=2):o+=n),3===t&&"!--"===o&&(t=4,u=u[0])}return l(),u}(e)),n),arguments,[])).length>1?n:n[0]}.bind(p);e.h=p,e.html=te,e.render=function(e,t,o){var r,u,l;_.__&&_.__(e,t),u=(r="function"==typeof o)?null:o&&o.__k||t.__k,l=[],D(t,e=(!r&&o||t).__k=p(d,null,[e]),u||i,i,void 0!==t.ownerSVGElement,!r&&o?[o]:u?null:t.firstChild?n.call(t.childNodes):null,l,!r&&o?o:u?u.__e:t.firstChild,r),w(l,e)},e.Component=v,e.createContext=function(e,n){var _={__c:n="__cC"+l++,__:e,Consumer:function(e,n){return e.children(n)},Provider:function(e){var _,t;return this.getChildContext||(_=[],(t={})[n]=this,this.getChildContext=function(){return t},this.shouldComponentUpdate=function(e){this.props.value!==e.value&&_.some(g)},this.sub=function(e){_.push(e);var n=e.componentWillUnmount;e.componentWillUnmount=function(){_.splice(_.indexOf(e),1),n&&n.call(e)}}),e.children}};return _.Provider.__=_.Consumer.contextType=_},e.useState=j,e.useReducer=G,e.useEffect=function(e,n){var t=$(F++,3);!_.__s&&Z(t.__H,n)&&(t.__=e,t.__H=n,L.__H.__h.push(t))},e.useLayoutEffect=z,e.useRef=function(e){return W=5,J(function(){return{current:e}},[])},e.useImperativeHandle=function(e,n,_){W=6,z(function(){"function"==typeof e?e(n()):e&&(e.current=n())},null==_?_:_.concat(e))},e.useMemo=J,e.useCallback=function(e,n){return W=8,J(function(){return e},n)},e.useContext=function(e){var n=L.context[e.__c],_=$(F++,9);return _.c=e,n?(null==_.__&&(_.__=!0,n.sub(L)),n.props.value):e.__},e.useDebugValue=function(e,n){_.useDebugValue&&_.useDebugValue(n?n(e):e)},e.useErrorBoundary=function(e){var n=$(F++,10),_=j();return n.__=e,L.componentDidCatch||(L.componentDidCatch=function(e){n.__&&n.__(e),_[1](e)}),[_[0],function(){_[1](void 0)}]}});
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* 아이디어 허브 · 보드 화면 시안 (feature/board-ui)
+   Claude Design 시안을 브라우저에서 바로 열 수 있게 옮긴 파일이에요.
+   화면 구조는 아래 render() 안의 템플릿, 동작은 Board 클래스에 있어요. */
+const { html, render, Component } = window.htmPreact;
+
+class DCLogic extends Component {
+  componentDidMount() { this.flushFocus(); }
+  componentDidUpdate() { this.flushFocus(); }
+  flushFocus() {
+    const go = this.pendingFocus;
+    this.pendingFocus = null;
+    if (go) go();
+  }
+  render() {
+    const V = this.renderVals();
+    return html`<div style="position: relative; height: 100vh; min-height: 820px; display: flex; background: #FFFFFF; font-family: Inter, 'Noto Sans KR', system-ui, sans-serif; color: #111118; font-size: 14px; overflow: hidden">
+
+  ${V.side ? html`
+    <aside aria-label="메뉴" style="flex: none; width: 248px; background: #F7F7F8; border-right: 1px solid #ECECEF; display: flex; flex-direction: column; padding: 14px 10px 12px; box-sizing: border-box; z-index: 8; animation: ihFade 0.2s ease">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 0 6px 14px">
+        <button type="button" onClick="${V.toggleSide}" aria-label="메뉴 숨기기" style="width: 34px; height: 34px; border: none; border-radius: 8px; background: transparent; color: #3C3F4A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M9 4v16"></path></svg>
+        </button>
+        <svg width="24" height="24" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="#111118"></rect><g stroke="#55586A" stroke-width="1.3" stroke-linecap="round"><line x1="14" y1="14" x2="14" y2="5.5"></line><line x1="14" y1="14" x2="22.1" y2="11.4"></line><line x1="14" y1="14" x2="19" y2="20.9"></line><line x1="14" y1="14" x2="9" y2="20.9"></line><line x1="14" y1="14" x2="5.9" y2="11.4"></line></g><circle cx="14" cy="5.5" r="2.3" fill="#5B8DF5"></circle><circle cx="22.1" cy="11.4" r="2.3" fill="#F28A45"></circle><circle cx="19" cy="20.9" r="2.3" fill="#A974E8"></circle><circle cx="9" cy="20.9" r="2.3" fill="#2DB88A"></circle><circle cx="5.9" cy="11.4" r="2.3" fill="#E9608F"></circle><circle cx="14" cy="14" r="3.3" fill="#FFFFFF"></circle></svg>
+        <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.2px">Idea hub</span>
+      </div>
+      <nav aria-label="보드 메뉴" style="display: flex; flex-direction: column; gap: 2px">
+        <a href="?board=new" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #111118; text-decoration: none; font-size: 14px; font-weight: 600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>새로운 메모 보드 만들기
+        </a>
+        <button type="button" onClick="${V.openSearch}" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; color: #3C3F4A; font: inherit; font-size: 14px; text-align: left; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>검색
+        </button>
+        <button type="button" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; color: #3C3F4A; font: inherit; font-size: 14px; text-align: left; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>프로젝트
+        </button>
+      </nav>
+      <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 26px">
+        <span style="font-size: 12px; font-weight: 600; color: #6B6E79; padding: 0 10px 6px">최근 항목</span>
+        <span aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; background: #ECECF0; font-size: 14px; font-weight: 600">아이디어 허브</span>
+        <a href="./index.html" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; color: #3C3F4A; text-decoration: none; font-size: 14px">웹페이지</a>
+      </div>
+      <span style="flex: 1"></span>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 10px 2px; border-top: 1px solid #E6E6EA">
+        <span style="width: 30px; height: 30px; border-radius: 15px; background: #E3E3E8; color: #3C3F4A; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">재</span>
+        <span style="font-size: 13px; color: #3C3F4A">재환 님, 환영합니다</span>
+      </div>
+    </aside>
+  ` : null}
+
+  <section aria-label="메모 캔버스" style="flex: 1; min-width: 0; position: relative; background-color: #FAFAF7; background-image: linear-gradient(#EFEFEA 1px, transparent 1px), linear-gradient(90deg, #EFEFEA 1px, transparent 1px); background-size: 28px 28px; cursor: ${V.cursor}">
+    <div ref="${V.scrollRef}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: auto">
+      <div style="position: relative; width: ${V.sw}px; height: ${V.sh}px; margin: 0 auto">
+        <div onDblClick="${V.worldDbl}" onPointerDown="${V.worldDown}" onPointerMove="${V.worldMove}" onPointerUp="${V.worldUp}" style="position: absolute; left: 24px; top: 72px; width: 1360px; height: ${V.worldH}px; transform: scale(${V.z}); transform-origin: 0 0; transition: transform 0.35s ease, height 0.6s cubic-bezier(.2,.8,.2,1)">
+
+          ${V.showEmpty ? html`
+            <div aria-hidden="true" style="position: absolute; left: 380px; top: 230px; width: 600px; display: flex; flex-direction: column; align-items: center; gap: 14px; pointer-events: none; animation: ihFade 0.4s ease">
+              <svg width="92" height="92" viewBox="0 0 64 64" fill="none" stroke="#B8B9C2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 58V30"></path><path d="M32 34c-2-10-10-14-18-12 1 9 8 14 18 12z"></path><path d="M32 30c2-10 10-14 18-12-1 9-8 14-18 12z"></path><path d="M14 58c6-5 30-5 36 0"></path></svg>
+              <span style="font-size: 26px; font-weight: 700; color: #3C3F4A; letter-spacing: -0.5px">생각나는 대로 바로 적어 보세요</span>
+              <span style="font-size: 17px; color: #6B6E79">다 쓰고 Enter를 누르면 메모지로 붙어요 · Shift+Enter는 다음 줄</span>
+              <span style="font-size: 17px; color: #6B6E79">빈 곳을 두 번 누르면 그 자리에서 적을 수 있어요</span>
+            </div>
+          ` : null}
+
+          ${(V.rowBoxes).map((rb, i) => html`
+            <div key=${rb._k || i} aria-hidden="true" style="position: absolute; left: 40px; top: ${rb.y}px; width: 1268px; height: ${rb.h}px; box-sizing: border-box; border-radius: 18px; border: 1.5px solid ${rb.bd}; background: ${rb.bg}; opacity: ${rb.op}; pointer-events: none; transition: top 0.6s cubic-bezier(.2,.8,.2,1), height 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.4s"></div>
+          `)}
+
+          ${V.classified ? html`
+            ${(V.rowHeads).map((rh, i) => html`
+              <button key=${rh._k || i} type="button" onClick="${rh.toggle}" aria-expanded="${rh.exp}" style="position: absolute; left: 44px; top: ${rh.y}px; height: 34px; padding: 0 12px 0 6px; border: none; border-radius: 10px; background: transparent; opacity: ${rh.op}; pointer-events: ${rh.pe}; display: inline-flex; align-items: center; gap: 8px; font: inherit; color: #111118; cursor: pointer; transition: top 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.4s">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3C3F4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(${rh.rot}deg); transition: transform 0.25s"><path d="M9 6l6 6-6 6"></path></svg>
+                <span style="width: 12px; height: 12px; border-radius: 4px; background: ${rh.c}"></span>
+                <span style="font-size: 20px; font-weight: 700">${rh.name}</span>
+                <span style="font-size: 16px; font-weight: 600; color: #5C5F6A; font-variant-numeric: tabular-nums">${rh.n}</span>
+              </button>
+            `)}
+          ` : null}
+
+          ${(V.cards).map((c, i) => html`
+            <div key=${c._k || i} style="position: absolute; left: ${c.x}px; top: ${c.y}px; width: ${c.w}px; height: ${c.h}px; box-sizing: border-box; border-radius: ${c.r}px; border: ${c.bd}; background-color: ${c.bg}; box-shadow: ${c.sh}; opacity: ${c.op}; pointer-events: ${c.pe}; overflow: hidden; z-index: ${c.zi}; transform: rotate(${c.rot}deg); animation: ${c.anim}; transition: left 0.7s cubic-bezier(.2,.8,.2,1), top 0.7s cubic-bezier(.2,.8,.2,1), width 0.5s cubic-bezier(.2,.8,.2,1), height 0.5s cubic-bezier(.2,.8,.2,1), border-radius 0.4s, background-color 0.35s, box-shadow 0.25s, opacity 0.3s, transform 0.4s">
+              <span aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; height: 22px; background: linear-gradient(180deg, rgba(110,80,0,0.09), rgba(110,80,0,0.02)); opacity: ${c.glue}; pointer-events: none; transition: opacity 0.35s"></span>
+              ${c.marked ? html`
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; right: 8px; top: 6px; pointer-events: none"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z" fill="#E5484D"></path></svg>
+              ` : null}
+              ${c.editing ? html`
+                <label for="${c.fid}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">메모 내용</label>
+                <textarea id="${c.fid}" ref="${c.ref}" value="${c.text}" onInput="${c.type}" onKeyDown="${c.key}" onBlur="${c.blur}" placeholder="${c.ph}" style="display: block; width: 100%; height: 100%; box-sizing: border-box; border: none; outline: none; resize: none; background: transparent; padding: ${c.pad}; font: inherit; font-size: ${c.fs}px; line-height: 1.4; color: ${c.ink}; overflow: hidden"></textarea>
+              ` : null}
+              ${c.view ? html`
+                <button type="button" onClick="${c.pick}" onDblClick="${c.edit}" aria-pressed="${c.sel}" style="width: 100%; height: 100%; box-sizing: border-box; padding: ${c.pad}; border: none; background: transparent; font: inherit; font-size: ${c.fs}px; font-weight: 500; line-height: 1.4; color: ${c.ink}; text-align: left; white-space: pre-line; display: flex; align-items: ${c.ai}; gap: 6px; overflow: hidden; cursor: inherit">
+                  <span style="flex: 1; min-width: 0; overflow: hidden; max-height: 100%">${c.text}</span>
+                  ${c.fresh ? html`<span style="flex: none; font-size: 12px; font-weight: 700; color: #7A4E00; background: #FFF1CC; border-radius: 8px; padding: 1px 7px">새 메모</span>` : null}
+                  ${c.pinned ? html`<span style="flex: none; font-size: 12px; font-weight: 700; color: #FFFFFF; background: #111118; border-radius: 8px; padding: 1px 7px">고정</span>` : null}
+                </button>
+              ` : null}
+            </div>
+          `)}
+
+          ${V.dh.show ? html`
+            <div aria-hidden="true" style="position: absolute; left: ${V.dh.x}px; top: ${V.dh.y}px; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #6B6E79; pointer-events: none; white-space: nowrap; z-index: 4; animation: ihFade 0.3s ease">
+              <span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border: 1px solid #DCDCE2; border-radius: 6px; background: #FFFFFF; font-size: 13px; font-weight: 600; color: #3C3F4A">Enter</span>메모지로 붙이기
+              <span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border: 1px solid #DCDCE2; border-radius: 6px; background: #FFFFFF; font-size: 13px; font-weight: 600; color: #3C3F4A; margin-left: 8px">Shift + Enter</span>다음 줄
+            </div>
+          ` : null}
+          ${(V.strokes).map((sk, i) => html`
+            <svg key=${sk._k || i} width="1360" height="1100" viewBox="0 0 1360 1100" aria-hidden="true" style="position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 5; opacity: ${sk.op}; transition: opacity 0.3s"><path d="${sk.d}" fill="none" stroke="#111118" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          `)}
+        </div>
+
+        ${V.ctx.show ? html`
+          <div role="toolbar" aria-label="선택한 항목 도구" style="position: absolute; left: ${V.ctx.x}px; top: ${V.ctx.y}px; display: flex; align-items: center; gap: 4px; padding: 5px; background: #111118; border-radius: 12px; box-shadow: 0 10px 28px rgba(17,17,24,0.28); z-index: 9; white-space: nowrap; animation: ihFade 0.15s ease">
+            ${(V.ctx.btns).map((b, i) => html`
+              <button key=${b._k || i} type="button" onClick="${b.fn}" aria-pressed="${b.on}" style="height: 32px; padding: 0 10px; border: none; border-radius: 8px; background: ${b.bg}; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer"><span style="width: 8px; height: 8px; border-radius: 4px; background: ${b.dot}; display: ${b.dotD}"></span>${b.label}</button>
+            `)}
+          </div>
+        ` : null}
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 14px; top: 14px; right: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; pointer-events: none; z-index: 6">
+      ${V.sideHidden ? html`
+        <button type="button" onClick="${V.toggleSide}" aria-label="메뉴 보기" style="pointer-events: auto; width: 40px; height: 40px; border: 1px solid #E3E3E8; border-radius: 12px; background: #FFFFFF; color: #3C3F4A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(17,17,24,0.06)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M9 4v16"></path></svg>
+        </button>
+      ` : null}
+      <div role="tablist" aria-label="보기" style="pointer-events: auto; display: flex; gap: 2px; background: #FFFFFF; border: 1px solid #E3E3E8; border-radius: 12px; padding: 4px; box-shadow: 0 2px 8px rgba(17,17,24,0.06)">
+        ${(V.views).map((v, i) => html`
+          <button key=${v._k || i} type="button" role="tab" aria-selected="${v.sel}" disabled="${v.dis}" onClick="${v.pick}" style="height: 32px; padding: 0 14px; border: none; border-radius: 8px; background: ${v.bg}; color: ${v.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">${v.name}</button>
+        `)}
+      </div>
+      <button type="button" onClick="${V.classify}" style="pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(17,17,24,0.15)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"></path><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path></svg>
+        ${V.classifyLabel}
+      </button>
+      ${V.hasHl ? html`
+        <span style="pointer-events: auto; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 16px; background: #0D99FF; color: #FFFFFF; font-size: 12px; font-weight: 600">메모 ${V.hlN}개 찾음</span>
+      ` : null}
+      <span style="flex: 1"></span>
+      <div style="pointer-events: auto; display: flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1px solid #E3E3E8; border-radius: 12px; padding: 3px; box-shadow: 0 2px 8px rgba(17,17,24,0.06)">
+        ${V.searchOpen ? html`
+          <label for="memo-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">메모 찾기</label>
+          <input id="memo-q" value="${V.q}" onInput="${V.typeQ}" placeholder="메모 찾기" autocomplete="off" style="width: 180px; height: 32px; padding: 0 10px; border: none; outline: none; background: #F2F2F5; border-radius: 8px; font: inherit; font-size: 13px; color: #111118" />
+        ` : null}
+        <button type="button" onClick="${V.toggleSearch}" aria-label="메모 찾기" aria-pressed="${V.searchAttr}" style="width: 32px; height: 32px; border: none; border-radius: 8px; background: transparent; color: #3C3F4A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        </button>
+        <span style="width: 1px; height: 20px; background: #E3E3E8"></span>
+        <button type="button" onClick="${V.zoomOut}" aria-label="축소" style="width: 32px; height: 32px; border: none; border-radius: 8px; background: transparent; color: #3C3F4A; font: inherit; font-size: 18px; cursor: pointer">−</button>
+        <button type="button" onClick="${V.zoomFit}" aria-label="70%로 맞추기" style="min-width: 52px; height: 32px; border: none; border-radius: 8px; background: transparent; color: #111118; font: inherit; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer">${V.zoomLabel}</button>
+        <button type="button" onClick="${V.zoomIn}" aria-label="확대" style="width: 32px; height: 32px; border: none; border-radius: 8px; background: transparent; color: #3C3F4A; font: inherit; font-size: 18px; cursor: pointer">+</button>
+      </div>
+      <button type="button" style="pointer-events: auto; height: 42px; padding: 0 16px; border: 1px solid #DCDCE2; border-radius: 12px; background: #FFFFFF; color: #111118; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(17,17,24,0.06)">공유</button>
+    </div>
+
+    ${V.toolsOpen ? html`
+      <div role="toolbar" aria-label="도구" aria-orientation="vertical" style="position: absolute; right: 14px; top: 72px; width: 68px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #E3E3E8; border-radius: 16px; padding: 6px; display: flex; flex-direction: column; align-items: stretch; gap: 2px; box-shadow: 0 8px 24px rgba(17,17,24,0.10); z-index: 6; animation: ihFade 0.2s ease">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 6px 6px">
+          <span style="font-size: 11px; font-weight: 700; color: #5C5F6A">도구</span>
+          <button type="button" onClick="${V.toggleTools}" aria-label="도구 창 숨기기" style="width: 22px; height: 22px; border: 1px solid #DCDCE2; border-radius: 6px; background: #FFFFFF; color: #5C5F6A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+        <button type="button" onClick="${V.tSel.pick}" aria-pressed="${V.tSel.on}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: none; border-radius: 10px; background: ${V.tSel.bg}; color: ${V.tSel.fg}; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 17 2.5-7 7-2.5z"></path></svg>선택
+        </button>
+        <button type="button" onClick="${V.tHand.pick}" aria-pressed="${V.tHand.on}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: none; border-radius: 10px; background: ${V.tHand.bg}; color: ${V.tHand.fg}; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V6a1.5 1.5 0 013 0v5"></path><path d="M10 10V4.5a1.5 1.5 0 013 0V10"></path><path d="M13 10V6a1.5 1.5 0 013 0v6"></path><path d="M16 9.5a1.5 1.5 0 013 0V15a6 6 0 01-6 6h-1.5a6 6 0 01-4.6-2.2L4 15.5a1.5 1.5 0 012.3-1.9L7 14.5V11"></path></svg>이동
+        </button>
+        <button type="button" onClick="${V.tPen.pick}" aria-pressed="${V.tPen.on}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: none; border-radius: 10px; background: ${V.tPen.bg}; color: ${V.tPen.fg}; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"></path></svg>펜
+        </button>
+        <button type="button" onClick="${V.tMemo.pick}" aria-pressed="${V.tMemo.on}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: none; border-radius: 10px; background: ${V.tMemo.bg}; color: ${V.tMemo.fg}; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path></svg>메모지
+        </button>
+        <button type="button" onClick="${V.tMark.pick}" aria-pressed="${V.tMark.on}" style="display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: none; border-radius: 10px; background: ${V.tMark.bg}; color: ${V.tMark.fg}; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"></path></svg>표시
+        </button>
+      </div>
+    ` : null}
+    ${V.toolsHidden ? html`
+      <button type="button" onClick="${V.toggleTools}" aria-label="도구 창 보기" style="position: absolute; right: 14px; top: 72px; height: 36px; padding: 0 12px; border: 1px solid #E3E3E8; border-radius: 12px; background: #FFFFFF; color: #3C3F4A; font: inherit; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(17,17,24,0.08); z-index: 6">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>도구
+      </button>
+    ` : null}
+
+    ${V.busy ? html`
+      <div role="status" style="position: absolute; left: 50%; top: 76px; transform: translateX(-50%); height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 22px; background: #111118; color: #FFFFFF; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px rgba(17,17,24,0.25); white-space: nowrap; z-index: 7">
+        <span style="width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; border: 2.5px solid #4A4D57; border-top-color: #FFFFFF; animation: ihSpin 0.8s linear infinite"></span>
+        비슷한 메모끼리 묶는 중이에요
+      </div>
+    ` : null}
+
+    <div style="position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 12px; background: rgba(255,255,255,0.92); border: 1px solid #E8E8EC; font-size: 12px; color: #4A4D57; white-space: nowrap; z-index: 6; pointer-events: none">${V.hint}</div>
+  </section>
+</div>`;
+  }
+}
+
+const GROUPS = [
+  { key: 'ui', name: '화면 UI', c: '#2F6FEB', t: '#DCE7FD', l: '#F3F7FE', side: 'R', gy: 150 },
+  { key: 'se', name: '검색', c: '#E8620F', t: '#FCE3D2', l: '#FEF6F0', side: 'R', gy: 430 },
+  { key: 'ai', name: 'AI 분류', c: '#8B3FD9', t: '#ECE0FA', l: '#F8F3FE', side: 'R', gy: 710 },
+  { key: 'db', name: 'DB 저장', c: '#0E9468', t: '#D3F0E3', l: '#F1FAF6', side: 'L', gy: 430 },
+  { key: 'co', name: '협업', c: '#D6336C', t: '#FADBE6', l: '#FEF4F7', side: 'L', gy: 150 },
+  { key: 'un', name: '미분류', c: '#8A8D97', t: '#E7E8EC', l: '#F6F6F8', side: 'L', gy: 710 }
+];
+const GK = {};
+GROUPS.forEach((g) => { GK[g.key] = g; });
+const ROWS = ['db', 'ui', 'se', 'ai', 'co', 'un'];
+const SEED = [
+  ['c1', '메인 화면은 심플하게', 'ui'],
+  ['c6', '검색 기능을 추가하자', 'se'],
+  ['c2', '버튼은 아이콘으로', 'ui'],
+  ['c16', '적자마자 자동 저장', 'db'],
+  ['c11', '비슷한 아이디어끼리 자동으로 묶기', 'ai'],
+  ['c20', '여러 명이 동시에 입력', 'co'],
+  ['c3', '주제마다 색을 다르게', 'ui'],
+  ['c7', '찾은 아이디어 위치를 보드에 표시', 'se'],
+  ['c23', '발표 날짜 다시 확인하기', 'un'],
+  ['c12', '그룹 이름 자동으로 붙이기', 'ai'],
+  ['c4', '다크 모드도 있으면 좋겠다', 'ui'],
+  ['c17', '수정 기록 남기기', 'db'],
+  ['c8', '태그로 필터링하기', 'se'],
+  ['c21', '링크로 보드 공유', 'co'],
+  ['c13', '애매한 메모는 미분류로 두기', 'ai'],
+  ['c5', '글씨 크기 조절 기능', 'ui'],
+  ['c18', '보드를 파일로 내보내기', 'db'],
+  ['c9', '최근 검색어 저장', 'se'],
+  ['c14', '직접 옮긴 메모는 다시 분류해도 유지', 'ai'],
+  ['c22', '메모에 댓글 달기', 'co'],
+  ['c19', '메모와 그룹 관계 저장', 'db'],
+  ['c10', '작성자별로 모아 보기', 'se'],
+  ['c15', '분류 결과 되돌리기', 'ai'],
+  ['c24', '교수님께 질문할 것 정리', 'un']
+];
+const KEYS = {
+  se: ['검색', '찾', '필터', '태그'],
+  ui: ['화면', '디자인', '버튼', '색', 'UI', '다크', '글씨', '아이콘', '배경'],
+  ai: ['분류', '묶', '그룹', '유사', 'AI'],
+  db: ['저장', 'DB', '데이터', '기록', '백업', '내보내'],
+  co: ['공유', '같이', '함께', '동시', '댓글', '팀']
+};
+const ZOOMS = [0.5, 0.6, 0.7, 0.85, 1, 1.25];
+const FIT = 2;
+const SEL = '0 0 0 2px #0D99FF, 0 10px 24px rgba(13,153,255,0.18)';
+function guess(text) {
+  const ks = Object.keys(KEYS);
+  for (let i = 0; i < ks.length; i++) {
+    if (KEYS[ks[i]].some((w) => text.indexOf(w) >= 0)) return ks[i];
+  }
+  return 'un';
+}
+function uid() {
+  return 'm' + Math.random().toString(36).slice(2, 9);
+}
+function slot(i) {
+  return { x: 48 + (i % 5) * 234, y: 40 + Math.floor(i / 5) * 232 };
+}
+const YELLOW = '#FFEF96';
+const PASTEL = { ui: '#D6E5FF', se: '#FFDFC6', ai: '#EADCFF', db: '#CDEFDD', co: '#FFD8E5', un: '#E9E9EC' };
+const STICK = '0 1px 1px rgba(60,48,10,0.10), 0 14px 20px -12px rgba(60,48,10,0.50)';
+const STICK_ANIM = 'ihStick 0.45s cubic-bezier(.2,.8,.2,1)';
+function tilt(id) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 997;
+  return ((h % 31) - 15) / 10;
+}
+function circlePts(cx, cy, rx, ry) {
+  const pts = [];
+  for (let t = -0.4; t < Math.PI * 2 + 0.3; t += 0.18) {
+    const w = 1 + Math.sin(t * 3) * 0.03;
+    pts.push({ x: Math.round(cx + Math.cos(t) * rx * w), y: Math.round(cy + Math.sin(t) * ry * w) });
+  }
+  return pts;
+}
+function lineCount(text, per) {
+  return (text || '').split('\n').reduce((n, l) => n + Math.max(1, Math.ceil(l.length / per)), 0);
+}
+function cardH(text) {
+  return Math.max(200, 48 + lineCount(text, 8) * 27);
+}
+function draftH(text) {
+  return Math.max(1, lineCount(text, 13)) * 30 + 12;
+}
+function pathOf(pts) {
+  return pts.map((p, i) => (i ? 'L ' : 'M ') + p.x + ' ' + p.y).join(' ');
+}
+class Board extends DCLogic {
+  constructor(props) {
+    super(props);
+    const st = props.start || '빈 보드';
+    const classified = st === '분류';
+    let cards = [];
+    let editing = null;
+    let strokes = [];
+    if (st === '빈 보드') {
+      cards = [{ id: 'm0', text: '', draft: true, truth: null, g: null, x: 48, y: 40, marked: false, pinned: false }];
+      editing = 'm0';
+    } else {
+      cards = SEED.map((x, i) => Object.assign({ id: x[0], text: x[1], truth: x[2], g: classified ? x[2] : null, marked: false, pinned: false }, slot(i)));
+    }
+    if (st === '메모') {
+      cards[3].marked = true;
+      cards.push(Object.assign({ id: 'm1', text: '보드 배경색도\n고를 수 있게', draft: true, truth: null, g: null, marked: false, pinned: false }, slot(24)));
+      editing = 'm1';
+      const p = slot(7);
+      strokes = [{ id: 's1', pts: circlePts(p.x + 100, p.y + 100, 138, 128) }];
+    }
+    this.state = {
+      step: classified ? 'groups' : 'cards',
+      classified: classified,
+      cards: cards,
+      editing: editing,
+      sel: null,
+      collapsed: {},
+      strokes: strokes,
+      drawing: null,
+      tool: 'select',
+      zi: FIT,
+      side: true,
+      tools: true,
+      searchOpen: false,
+      q: '',
+      busy: false
+    };
+    this.focused = null;
+    this.timer = null;
+  }
+  componentWillUnmount() {
+    if (this.timer) clearTimeout(this.timer);
+  }
+  overlaps(cards, p, skip) {
+    return cards.some((c) => c.id !== skip && p.x < c.x + 214 && p.x + 214 > c.x && p.y < c.y + cardH(c.text) + 12 && p.y + 200 > c.y);
+  }
+  nextSlot(cards) {
+    for (let i = 0; i < 300; i++) {
+      const p = slot(i);
+      if (!this.overlaps(cards, p)) return p;
+    }
+    return slot(0);
+  }
+  newMemo(pos, g) {
+    const cards = this.state.cards.filter((c) => !(c.draft && !c.text.trim()));
+    const p = pos || this.nextSlot(cards);
+    const id = uid();
+    this.focused = null;
+    this.setState({ cards: cards.concat([{ id: id, text: '', draft: !g, truth: g || null, g: g || null, x: p.x, y: p.y, marked: false, pinned: false }]), editing: id, sel: null });
+  }
+  commit(id, then) {
+    const st = this.state;
+    const item = st.cards.find((x) => x.id === id);
+    const empty = !item || !item.text.trim();
+    const patch = { editing: null };
+    if (empty) {
+      patch.cards = st.cards.filter((c) => c.id !== id);
+    } else if (item.draft) {
+      patch.cards = st.cards.map((c) => c.id === id ? Object.assign({}, c, { draft: false }) : c);
+    }
+    this.focused = null;
+    this.setState(patch);
+    return !empty;
+  }
+  next(id) {
+    const st = this.state;
+    const card = st.cards.find((c) => c.id === id);
+    if (!card || !card.text.trim()) return;
+    if (!card.draft) { this.commit(id); return; }
+    const done = st.cards.map((c) => c.id === id ? Object.assign({}, c, { draft: false }) : c);
+    let p = { x: card.x, y: card.y + cardH(card.text) + 28 };
+    if (this.overlaps(done, p)) p = this.nextSlot(done);
+    const nid = uid();
+    this.focused = null;
+    this.setState({ cards: done.concat([{ id: nid, text: '', draft: true, truth: null, g: null, x: p.x, y: p.y, marked: false, pinned: false }]), editing: nid, sel: null });
+  }
+  setText(id, text) {
+    const st = this.state;
+    this.setState({ cards: st.cards.map((c) => c.id === id ? Object.assign({}, c, { text: text }) : c) });
+  }
+  edit(id) {
+    this.focused = null;
+    this.setState({ editing: id, sel: null });
+  }
+  keyFor(id) {
+    return (e) => {
+      const composing = (e.nativeEvent || e).isComposing || e.keyCode === 229;
+      if (e.key === 'Enter' && !e.shiftKey && !composing) { e.preventDefault(); this.next(id); }
+      else if (e.key === 'Escape') { e.preventDefault(); this.commit(id); }
+    };
+  }
+  refFor(id) {
+    return (el) => {
+      if (el && this.focused !== id) {
+        this.focused = id;
+        const go = () => {
+          el.focus();
+          const n = el.value.length;
+          try { el.setSelectionRange(n, n); } catch (err) {}
+        };
+        if (el.isConnected) go(); else this.pendingFocus = go;
+      }
+    };
+  }
+  classify() {
+    if (this.timer) clearTimeout(this.timer);
+    if (this.state.editing) this.commit(this.state.editing);
+    this.setState({ busy: true, sel: null });
+    this.timer = setTimeout(() => {
+      const st = this.state;
+      const cards = st.cards.map((c) => c.pinned ? c : Object.assign({}, c, { g: c.truth || guess(c.text) }));
+      this.setState({ cards: cards, classified: true, busy: false, step: 'groups' });
+    }, 1100);
+  }
+  local(e, z) {
+    const r = e.currentTarget.getBoundingClientRect();
+    return { x: Math.round((e.clientX - r.left) / z), y: Math.round((e.clientY - r.top) / z) };
+  }
+  renderVals() {
+    const s = this.state;
+    const step = s.classified ? s.step : 'cards';
+    const z = ZOOMS[s.zi];
+    const eff = (c) => c.g || 'un';
+    const members = {};
+    GROUPS.forEach((g) => { members[g.key] = []; });
+    s.cards.forEach((c) => { members[eff(c)].push(c.id); });
+    const isGroups = step === 'groups';
+    const isCards = step === 'cards';
+
+    let cardsH = 0;
+    s.cards.forEach((c) => { cardsH = Math.max(cardsH, c.y + (c.draft ? draftH(c.text) + 40 : cardH(c.text))); });
+    cardsH = Math.max(780, cardsH + 200);
+
+    const rowBox = {}, rowHead = {}, regCard = {};
+    let y = 28;
+    ROWS.forEach((k) => {
+      const ids = members[k];
+      if (!ids.length) return;
+      const col = !!s.collapsed[k];
+      rowHead[k] = y;
+      const boxY = y + 42;
+      const lines = col ? 0 : Math.ceil(ids.length / 6);
+      const boxH = col ? 0 : 18 + lines * 176 - 14 + 18;
+      rowBox[k] = { y: boxY, h: boxH };
+      ids.forEach((id, i) => {
+        regCard[id] = col ? { x: 58, y: boxY - 30, w: 190, h: 162, hide: true } : { x: 58 + (i % 6) * 206, y: boxY + 18 + Math.floor(i / 6) * 176, w: 190, h: 162 };
+      });
+      y = boxY + boxH + (col ? 6 : 26);
+    });
+    const groupsH = y + 60;
+
+    const q = s.q.trim();
+    const hl = s.searchOpen && q ? s.cards.filter((c) => c.text.indexOf(q) >= 0).map((c) => c.id) : null;
+    const sel = s.sel;
+    const posOf = {};
+    const cards = s.cards.map((c) => {
+      const g = GK[eff(c)];
+      const editing = s.editing === c.id;
+      const isSel = !!sel && sel.kind === 'card' && sel.id === c.id;
+      const inHl = !hl || hl.indexOf(c.id) >= 0;
+      const fresh = s.classified && !c.g && !editing;
+      const paper = s.classified && c.g ? PASTEL[c.g] : YELLOW;
+      const lean = editing || isSel ? 0 : tilt(c.id);
+      let p, st;
+      if (isCards && c.draft) {
+        p = { x: c.x, y: c.y, w: 400, h: draftH(c.text) };
+        st = { pad: '4px 6px', r: 4, fs: 21, ai: 'flex-start', glue: 0, bg: 'rgba(255,239,150,0)', bd: '1px solid rgba(0,0,0,0)', sh: 'none', rot: 0, anim: 'none', ink: '#111118', op: 1, pe: 'auto' };
+      } else if (isCards) {
+        p = { x: c.x, y: c.y, w: 200, h: cardH(c.text) };
+        st = { pad: '30px 18px 16px 20px', r: 3, fs: 19, ai: 'flex-start', glue: 1, bg: paper, bd: '1px solid rgba(0,0,0,0.04)', sh: editing ? '0 1px 1px rgba(60,48,10,0.10), 0 22px 30px -14px rgba(60,48,10,0.55)' : STICK, rot: lean, anim: STICK_ANIM, ink: '#2B2410', op: 1, pe: 'auto' };
+      } else {
+        p = regCard[c.id];
+        st = { pad: '28px 16px 14px 18px', r: 3, fs: 16, ai: 'flex-start', glue: 1, bg: paper, bd: '1px solid ' + (fresh ? '#E8C85A' : 'rgba(0,0,0,0.04)'), sh: STICK, rot: lean * 0.6, anim: STICK_ANIM, ink: '#2B2410', op: p.hide ? 0 : 1, pe: p.hide ? 'none' : 'auto' };      }
+      if (hl && inHl) st.sh = '0 0 0 4px rgba(13,153,255,0.35)';
+      if (hl && !inHl) st.op = Math.min(st.op, 0.22);
+      if (isSel) st.sh = SEL;
+      posOf[c.id] = p;
+      return Object.assign({
+        _k: c.id, text: c.text, x: p.x, y: p.y, w: p.w, h: p.h,
+        editing: editing, view: !editing, fid: 'memo-' + c.id,
+        marked: !!c.marked && !c.draft,
+        ph: c.draft ? '적고 Enter를 누르면 메모지가 돼요' : '여기에 적어요',
+        zi: editing || isSel ? 4 : 2,
+        fresh: fresh, pinned: !!c.pinned && !isCards,
+        sel: isSel ? 'true' : 'false',
+        ref: this.refFor(c.id),
+        type: (e) => this.setText(c.id, e.target.value),
+        key: this.keyFor(c.id),
+        blur: () => { if (this.state.editing === c.id) this.commit(c.id); },
+        edit: () => { if (this.state.tool !== 'pen') this.edit(c.id); },
+        pick: () => {
+          const t = this.state.tool;
+          if (t === 'pen' || t === 'hand') return;
+          if (t === 'mark') { this.setState({ cards: this.state.cards.map((x) => x.id === c.id ? Object.assign({}, x, { marked: !x.marked }) : x) }); return; }
+          const cur = this.state.sel;
+          this.setState({ sel: cur && cur.kind === 'card' && cur.id === c.id ? null : { kind: 'card', id: c.id } });
+        }
+      }, st);
+    });
+
+    const rowBoxes = ROWS.filter((k) => rowBox[k]).map((k) => ({ y: rowBox[k].y, h: rowBox[k].h, bg: GK[k].l, bd: GK[k].t, op: isGroups && rowBox[k].h > 0 ? 1 : 0 }));
+    const rowHeads = ROWS.filter((k) => rowHead[k] !== undefined).map((k) => ({
+      y: rowHead[k], name: GK[k].name, n: members[k].length, c: GK[k].c,
+      rot: s.collapsed[k] ? 0 : 90, exp: s.collapsed[k] ? 'false' : 'true',
+      op: isGroups ? 1 : 0, pe: isGroups ? 'auto' : 'none',
+      toggle: () => { const cl = Object.assign({}, this.state.collapsed); cl[k] = !cl[k]; this.setState({ collapsed: cl }); }
+    }));
+    const ctx = { show: false, x: 0, y: 0, btns: [] };
+    const bt = (label, fn, extra) => Object.assign({ label: label, fn: fn, bg: 'transparent', dot: 'transparent', dotD: 'none', on: 'false' }, extra || {});
+    if (sel && !s.editing && !s.busy) {
+      if (sel.kind === 'card' && posOf[sel.id]) {
+        const p = posOf[sel.id];
+        const c = s.cards.find((x) => x.id === sel.id);
+        const btns = [];
+        if (isCards) {
+          btns.push(bt('편집', () => this.edit(c.id)));
+          btns.push(bt(c.marked ? '표시 해제' : '표시', () => this.setState({ cards: this.state.cards.map((x) => x.id === c.id ? Object.assign({}, x, { marked: !x.marked }) : x) })));
+          btns.push(bt('삭제', () => this.setState({ cards: this.state.cards.filter((x) => x.id !== c.id), sel: null })));
+        } else {
+          GROUPS.forEach((g) => {
+            const on = eff(c) === g.key;
+            btns.push(bt(g.name, () => this.setState({ cards: this.state.cards.map((x) => x.id === c.id ? Object.assign({}, x, { g: g.key, pinned: true }) : x) }), { dot: g.c, dotD: 'inline-block', bg: on ? '#3A3A46' : 'transparent', on: on ? 'true' : 'false' }));
+          });
+          btns.push(bt('편집', () => this.edit(c.id)));
+        }
+        ctx.show = true;
+        ctx.btns = btns;
+        ctx.x = Math.round(24 + p.x * z);
+        ctx.y = Math.round(72 + p.y * z) - 52;
+        if (ctx.y < 60) ctx.y = Math.round(72 + (p.y + p.h) * z) + 10;      }
+    }
+
+    const showEmpty = isCards && s.cards.every((c) => c.draft && !c.text.trim());
+    const dc = isCards && s.editing ? s.cards.find((c) => c.id === s.editing && c.draft) : null;
+    const dh = dc ? { show: true, x: dc.x + 8, y: dc.y + draftH(dc.text) + 8 } : { show: false, x: 0, y: 0 };
+    const worldH = isCards ? cardsH : groupsH;
+    const hint = s.tool === 'pen' ? '드래그해서 그려요 · 다른 도구를 고르면 펜이 꺼져요'
+      : s.tool === 'memo' ? '메모를 놓을 곳을 한 번 누르세요'
+      : s.tool === 'mark' ? '표시할 메모를 누르세요 · 다시 누르면 해제'
+      : isCards ? '빈 곳을 두 번 누르면 거기서 바로 적기 · Enter 메모지로 붙이기 · Shift+Enter 다음 줄 · 메모지를 두 번 누르면 고치기'
+      : '메모를 누르면 다른 주제로 옮길 수 있어요 · 주제 이름을 누르면 접고 펼쳐요';
+    const viewDefs = [['cards', '카드'], ['groups', '분류']];
+    const toolBtn = (k) => {
+      const on = s.tool === k;
+      return {
+        on: on ? 'true' : 'false', bg: on ? '#111118' : 'transparent', fg: on ? '#FFFFFF' : '#3C3F4A',
+        pick: () => {
+          if (k === 'memo' && !isCards) { this.setState({ step: 'cards', tool: 'memo', sel: null }); return; }
+          this.setState({ tool: k, sel: null });
+        }
+      };
+    };
+    return {
+      side: s.side, sideHidden: !s.side,
+      toggleSide: () => this.setState({ side: !this.state.side }),
+      openSearch: () => this.setState({ searchOpen: true }),
+      cursor: s.tool === 'hand' ? 'grab' : s.tool === 'pen' || s.tool === 'memo' ? 'crosshair' : 'default',
+      sw: Math.round(1360 * z) + 48, sh: Math.round(worldH * z) + 72 + 90, z: z, worldH: worldH,
+      showEmpty: showEmpty,
+      dh: dh,
+      rowBoxes: rowBoxes, rowHeads: rowHeads,
+      classified: s.classified, cards: cards,
+      strokes: s.strokes.concat(s.drawing ? [{ id: 'cur', pts: s.drawing }] : []).map((k) => ({ d: pathOf(k.pts), op: isCards ? 1 : 0 })),
+      ctx: ctx,
+      worldDbl: (e) => {
+        if (e.target !== e.currentTarget || !isCards || this.state.tool !== 'select') return;
+        const p = this.local(e, z);
+        this.newMemo({ x: p.x - 8, y: p.y - 20 });
+      },
+      worldDown: (e) => {
+        const t = this.state.tool;
+        if (t === 'hand' && this.scroller) {
+          try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+          this.pan = { x: e.clientX, y: e.clientY, sl: this.scroller.scrollLeft, st: this.scroller.scrollTop };
+          return;
+        }
+        if (t === 'pen' && isCards) {
+          try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+          this.setState({ drawing: [this.local(e, z)] });
+          return;
+        }
+        if (e.target !== e.currentTarget) return;
+        if (t === 'memo' && isCards) {
+          const p = this.local(e, z);
+          this.newMemo({ x: p.x - 8, y: p.y - 20 });
+          this.setState({ tool: 'select' });
+          return;
+        }
+        if (this.state.sel) this.setState({ sel: null });
+      },
+      worldMove: (e) => {
+        if (this.pan && this.scroller) {
+          this.scroller.scrollLeft = this.pan.sl - (e.clientX - this.pan.x);
+          this.scroller.scrollTop = this.pan.st - (e.clientY - this.pan.y);
+          return;
+        }
+        const d = this.state.drawing;
+        if (!d) return;
+        const p = this.local(e, z);
+        const last = d[d.length - 1];
+        if (Math.abs(p.x - last.x) + Math.abs(p.y - last.y) < 3) return;
+        this.setState({ drawing: d.concat([p]) });
+      },
+      worldUp: () => {
+        this.pan = null;
+        const d = this.state.drawing;
+        if (!d) return;
+        this.setState({ strokes: d.length > 1 ? this.state.strokes.concat([{ id: uid(), pts: d }]) : this.state.strokes, drawing: null });
+      },
+      views: viewDefs.map((d) => {
+        const on = step === d[0];
+        const dis = !s.classified && d[0] !== 'cards';
+        return { name: d[1], sel: on ? 'true' : 'false', dis: dis, bg: on ? '#111118' : 'transparent', fg: on ? '#FFFFFF' : dis ? '#A3A5AE' : '#3C3F4A', pick: () => { if (dis) return; if (this.state.editing) this.commit(this.state.editing); this.setState({ step: d[0], sel: null }); } };
+      }),
+      classify: () => this.classify(),
+      classifyLabel: s.classified ? '다시 분류' : '분류하기',
+      hasHl: !!hl, hlN: hl ? hl.length : 0,
+      searchOpen: s.searchOpen, searchAttr: s.searchOpen ? 'true' : 'false', q: s.q,
+      typeQ: (e) => this.setState({ q: e.target.value }),
+      toggleSearch: () => this.setState({ searchOpen: !this.state.searchOpen, q: '' }),
+      zoomLabel: Math.round(z * 100) + '%',
+      zoomIn: () => this.setState({ zi: Math.min(ZOOMS.length - 1, this.state.zi + 1) }),
+      zoomOut: () => this.setState({ zi: Math.max(0, this.state.zi - 1) }),
+      zoomFit: () => this.setState({ zi: FIT }),
+      toolsOpen: s.tools, toolsHidden: !s.tools,
+      toggleTools: () => this.setState({ tools: !this.state.tools }),
+      tSel: toolBtn('select'), tHand: toolBtn('hand'), tPen: toolBtn('pen'), tMemo: toolBtn('memo'), tMark: toolBtn('mark'),
+      scrollRef: (el) => { this.scroller = el; },
+      busy: s.busy,
+      hint: hint
+    };
+  }
+}
+
+const params = new URLSearchParams(location.search);
+const START = { new: '빈 보드', memo: '메모', groups: '분류' };
+render(html`<${Board} start=${START[params.get('board')] || '메모'} />`, document.getElementById('app'));
+</script>
+</body>
+</html>
