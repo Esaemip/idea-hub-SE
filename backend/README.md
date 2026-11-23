@@ -2,6 +2,21 @@
 
 보드·카드·그룹 API와 데이터 저장을 구현하는 공간입니다.
 
+## 보드·카드 API 실행
+
+저장소 루트에서 Python 3.12 이상을 사용합니다.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --reload
+```
+
+서버가 켜지면 `http://127.0.0.1:8000/docs`에서 요청을 실행해 볼 수 있습니다. 보드 목록·생성·상세·삭제와 아이디어 생성·수정·삭제를 제공합니다. DB와 테이블은 서버가 시작될 때 준비됩니다. 그룹 수정과 AI 분석은 후속 작업입니다.
+
+로컬 프론트엔드 주소는 `http://localhost:5173` 또는 `http://127.0.0.1:5173`을 허용합니다. 다른 포트를 사용하면 프론트엔드 담당자와 주소를 맞춰 설정을 변경해야 합니다.
+
 ## SQLite DB 준비
 
 저장소 루트에서 아래 명령을 실행하면 `backend/idea_hub.sqlite3` 파일과 테이블이 생성됩니다. Python 표준 라이브러리만 사용합니다.
