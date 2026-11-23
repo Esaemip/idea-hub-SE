@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Idea hub — 메모 보드 시안</title>
+<title>Idea hub — 보드</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#FFFFFF}
 @keyframes ihFade{from{opacity:0}to{opacity:1}}
 @keyframes ihSpin{to{transform:rotate(360deg)}}
+@keyframes ihShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
 @keyframes ihStick{0%{transform:scale(0.9)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
 </style>
 <script>
@@ -20,9 +21,7 @@ body{margin:0;background:#FFFFFF}
 <body>
 <div id="app"></div>
 <script>
-/* 아이디어 허브 · 보드 화면 시안 (feature/board-ui)
-   Claude Design 시안을 브라우저에서 바로 열 수 있게 옮긴 파일이에요.
-   화면 구조는 아래 render() 안의 템플릿, 동작은 Board 클래스에 있어요. */
+/* 아이디어 허브 · 화면 시안 (feature/board-ui). 화면 구조는 render() 안의 템플릿, 동작은 Page 클래스에 있어요. */
 const { html, render, Component } = window.htmPreact;
 
 class DCLogic extends Component {
@@ -47,25 +46,42 @@ class DCLogic extends Component {
         <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.2px">Idea hub</span>
       </div>
       <nav aria-label="보드 메뉴" style="display: flex; flex-direction: column; gap: 2px">
-        <a href="?board=new" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #111118; text-decoration: none; font-size: 14px; font-weight: 600">
+        <a href="boards.html?state=new" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #111118; text-decoration: none; font-size: 14px; font-weight: 600">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>새로운 메모 보드 만들기
         </a>
         <button type="button" onClick="${V.openSearch}" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; color: #3C3F4A; font: inherit; font-size: 14px; text-align: left; cursor: pointer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>검색
         </button>
-        <button type="button" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; color: #3C3F4A; font: inherit; font-size: 14px; text-align: left; cursor: pointer">
+        <a href="boards.html" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #3C3F4A; text-decoration: none; font-size: 14px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>프로젝트
-        </button>
+        </a>
       </nav>
       <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 26px">
         <span style="font-size: 12px; font-weight: 600; color: #6B6E79; padding: 0 10px 6px">최근 항목</span>
         <span aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; background: #ECECF0; font-size: 14px; font-weight: 600">아이디어 허브</span>
-        <a href="./index.html" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; color: #3C3F4A; text-decoration: none; font-size: 14px">웹페이지</a>
+        <a href="index.html" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; color: #3C3F4A; text-decoration: none; font-size: 14px">웹페이지</a>
       </div>
       <span style="flex: 1"></span>
-      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 10px 2px; border-top: 1px solid #E6E6EA">
-        <span style="width: 30px; height: 30px; border-radius: 15px; background: #E3E3E8; color: #3C3F4A; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">재</span>
-        <span style="font-size: 13px; color: #3C3F4A">재환 님, 환영합니다</span>
+      <div style="position: relative; border-top: 1px solid #E6E6EA; padding-top: 8px">
+        ${V.acctOpen ? html`
+          <div role="menu" aria-label="계정" style="position: absolute; left: 0; right: 0; bottom: 60px; background: #FFFFFF; border: 1px solid #E3E3E8; border-radius: 12px; box-shadow: 0 12px 32px rgba(17,17,24,0.14); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 10; animation: ihFade 0.15s ease">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; border-bottom: 1px solid #EEEEF1; margin-bottom: 4px">
+              <span style="font-size: 13px; font-weight: 700">이재환</span>
+              <span style="font-size: 12px; color: #5C5F6A">jaehwan@example.com</span>
+            </div>
+            <a role="menuitem" href="account.html" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border-radius: 8px; color: #111118; text-decoration: none; font-size: 13px; font-weight: 600">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>계정 설정
+            </a>
+            <a role="menuitem" href="login.html" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border-radius: 8px; color: #111118; text-decoration: none; font-size: 13px; font-weight: 600">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>로그아웃
+            </a>
+          </div>
+        ` : null}
+        <button type="button" onClick="${V.toggleAcct}" aria-haspopup="menu" aria-expanded="${V.acctAttr}" style="width: 100%; display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; font: inherit; text-align: left; cursor: pointer">
+          <span style="flex: none; width: 30px; height: 30px; border-radius: 15px; background: #E3E3E8; color: #3C3F4A; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">재</span>
+          <span style="flex: 1; min-width: 0; font-size: 13px; color: #3C3F4A">재환 님, 환영합니다</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5F6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14l5-5 5 5"></path></svg>
+        </button>
       </div>
     </aside>
   ` : null}
@@ -114,6 +130,7 @@ class DCLogic extends Component {
                   <span style="flex: 1; min-width: 0; overflow: hidden; max-height: 100%">${c.text}</span>
                   ${c.fresh ? html`<span style="flex: none; font-size: 12px; font-weight: 700; color: #7A4E00; background: #FFF1CC; border-radius: 8px; padding: 1px 7px">새 메모</span>` : null}
                   ${c.pinned ? html`<span style="flex: none; font-size: 12px; font-weight: 700; color: #FFFFFF; background: #111118; border-radius: 8px; padding: 1px 7px">고정</span>` : null}
+                  ${c.failed ? html`<span style="flex: none; font-size: 12px; font-weight: 700; color: #FFFFFF; background: #C4314B; border-radius: 8px; padding: 1px 7px">저장 못 함</span>` : null}
                 </button>
               ` : null}
             </div>
@@ -151,7 +168,7 @@ class DCLogic extends Component {
           <button key=${v._k || i} type="button" role="tab" aria-selected="${v.sel}" disabled="${v.dis}" onClick="${v.pick}" style="height: 32px; padding: 0 14px; border: none; border-radius: 8px; background: ${v.bg}; color: ${v.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">${v.name}</button>
         `)}
       </div>
-      <button type="button" onClick="${V.classify}" style="pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(17,17,24,0.15)">
+      <button type="button" onClick="${V.classify}" disabled="${V.noBoard}" style="pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; opacity: ${V.classifyOp}; box-shadow: 0 2px 8px rgba(17,17,24,0.15)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"></path><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path></svg>
         ${V.classifyLabel}
       </button>
@@ -210,6 +227,80 @@ class DCLogic extends Component {
       <div role="status" style="position: absolute; left: 50%; top: 76px; transform: translateX(-50%); height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 22px; background: #111118; color: #FFFFFF; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px rgba(17,17,24,0.25); white-space: nowrap; z-index: 7">
         <span style="width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; border: 2.5px solid #4A4D57; border-top-color: #FFFFFF; animation: ihSpin 0.8s linear infinite"></span>
         비슷한 메모끼리 묶는 중이에요
+      </div>
+    ` : null}
+
+    ${V.isLoading ? html`
+      <div role="status" aria-busy="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; box-sizing: border-box; padding: 96px 110px 80px 40px; display: flex; flex-direction: column; gap: 22px; pointer-events: none">
+        <span style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #4A4D57">
+          <span style="width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; border: 2.5px solid #DCDCE2; border-top-color: #111118; animation: ihSpin 0.8s linear infinite"></span>보드를 불러오는 중이에요
+        </span>
+        <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; max-width: 880px">
+          ${(V.skel).map((k, i) => html`
+            <span key=${k._k || i} style="aspect-ratio: 1 / 1; border-radius: 3px; opacity: ${k.op}; background: linear-gradient(90deg, #EFEFF1 0px, #F8F8FA 160px, #EFEFF1 320px); background-size: 640px 100%; animation: ihShimmer 1.2s linear infinite"></span>
+          `)}
+        </div>
+      </div>
+    ` : null}
+
+    ${V.isOffline ? html`
+      <div role="alert" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 460px; max-width: calc(100% - 48px); box-sizing: border-box; z-index: 7; padding: 32px 28px 28px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E6E6EA; box-shadow: 0 20px 50px rgba(17,17,24,0.12); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: ihFade 0.25s ease">
+        <span style="width: 56px; height: 56px; border-radius: 28px; background: #FDECEF; color: #C4314B; display: inline-flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M8.5 8.5A5.5 5.5 0 006 13H5.5a3.5 3.5 0 000 7H17"></path><path d="M11 6.2A6 6 0 0117.8 11 3.5 3.5 0 0120.6 17"></path></svg></span>
+        <h2 style="margin: 0; font-size: 20px; font-weight: 700">보드를 불러오지 못했어요</h2>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4A4D57">서버에 연결할 수 없어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 이미 저장된 메모는 사라지지 않아요.</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px">
+          <a href="boards.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; box-sizing: border-box; border: 1.5px solid #DCDCE2; border-radius: 12px; background: #FFFFFF; color: #111118; text-decoration: none; font-size: 14px; font-weight: 700">내 보드 목록</a>
+          <button type="button" onClick="${V.retryLoad}" style="height: 44px; padding: 0 18px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">다시 시도</button>
+        </div>
+      </div>
+    ` : null}
+
+    ${V.isNotFound ? html`
+      <div role="alert" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 460px; max-width: calc(100% - 48px); box-sizing: border-box; z-index: 7; padding: 32px 28px 28px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E6E6EA; box-shadow: 0 20px 50px rgba(17,17,24,0.12); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: ihFade 0.25s ease">
+        <span style="width: 56px; height: 56px; border-radius: 28px; background: #F0F0F3; color: #4A4D57; display: inline-flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"></path></svg></span>
+        <h2 style="margin: 0; font-size: 20px; font-weight: 700">이 보드를 찾을 수 없어요</h2>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4A4D57">보드가 지워졌거나 주소가 잘못됐어요. 내 보드 목록에서 다시 골라 주세요.</p>
+        <a href="boards.html" style="margin-top: 6px; display: inline-flex; align-items: center; height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 12px; background: #111118; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 700">내 보드 목록으로</a>
+      </div>
+    ` : null}
+
+    ${V.noHit ? html`
+      <div role="status" style="position: absolute; left: 50%; top: 76px; transform: translateX(-50%); z-index: 7; width: 420px; max-width: calc(100% - 48px); box-sizing: border-box; padding: 18px 20px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E3E8; box-shadow: 0 12px 32px rgba(17,17,24,0.14); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; animation: ihFade 0.2s ease">
+        <span style="width: 44px; height: 44px; border-radius: 22px; background: #F0F0F3; color: #4A4D57; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path><path d="M8.5 11h5"></path></svg></span>
+        <strong style="font-size: 15px; font-weight: 700">‘${V.qText}’와 맞는 메모가 없어요</strong>
+        <span style="font-size: 13px; line-height: 1.55; color: #4A4D57">다른 낱말로 찾아보세요. 분류한 뒤에는 주제별 줄에서 살펴볼 수도 있어요.</span>
+        <button type="button" onClick="${V.clearQ}" style="margin-top: 4px; height: 36px; padding: 0 14px; border: 1.5px solid #DCDCE2; border-radius: 10px; background: #FFFFFF; color: #111118; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">찾기 지우기</button>
+      </div>
+    ` : null}
+
+    ${V.goneNote ? html`
+      <div role="alert" style="position: absolute; left: 50%; top: 76px; transform: translateX(-50%); z-index: 7; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #E3D2A6; box-shadow: 0 12px 32px rgba(17,17,24,0.14); font-size: 13px; color: #111118; white-space: nowrap; animation: ihFade 0.2s ease">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A6700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"></path></svg>
+        <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-weight: 700">이 메모는 이미 지워졌어요</strong><span style="color: #4A4D57">다른 곳에서 지운 메모라 고칠 수 없어요. 보드를 최신 상태로 다시 불러왔어요.</span></span>
+        <button type="button" onClick="${V.dismissGone}" aria-label="알림 닫기" style="width: 36px; height: 36px; border: none; border-radius: 10px; background: transparent; color: #5C5F6A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+    ` : null}
+
+    ${V.analyzeFail ? html`
+      <div role="alert" style="position: absolute; left: 50%; top: 76px; transform: translateX(-50%); z-index: 7; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #F2B8C3; box-shadow: 0 12px 32px rgba(17,17,24,0.14); font-size: 13px; color: #111118; white-space: nowrap; animation: ihFade 0.2s ease">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4314B" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5"></path><path d="M12 16.5v0.5"></path></svg>
+        <span style="display: flex; flex-direction: column; gap: 1px"><strong style="font-weight: 700">분류하지 못했어요</strong><span style="color: #4A4D57">메모는 그대로 있어요. 잠시 뒤 다시 눌러 주세요.</span></span>
+        <button type="button" onClick="${V.retryAnalyze}" style="height: 36px; padding: 0 14px; border: none; border-radius: 10px; background: #111118; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">다시 시도</button>
+        <button type="button" onClick="${V.dismissFail}" aria-label="알림 닫기" style="width: 36px; height: 36px; border: none; border-radius: 10px; background: transparent; color: #5C5F6A; display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+    ` : null}
+
+    ${V.hasFailed ? html`
+      <div role="alert" style="position: absolute; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 7; display: flex; align-items: center; gap: 12px; padding: 7px 7px 7px 16px; border-radius: 14px; background: #111118; color: #FFFFFF; font-size: 13px; white-space: nowrap; box-shadow: 0 12px 32px rgba(17,17,24,0.25); animation: ihFade 0.2s ease">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF9DAF" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5"></path><path d="M12 16.5v0.5"></path></svg>
+        <span>메모 ${V.failedN}개를 저장하지 못했어요. 인터넷 연결을 확인해 주세요.</span>
+        <button type="button" onClick="${V.retrySave}" style="height: 34px; padding: 0 14px; border: none; border-radius: 10px; background: #FFFFFF; color: #111118; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">다시 저장</button>
+      </div>
+    ` : null}
+
+    ${V.savedNote ? html`
+      <div role="status" style="position: absolute; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 7; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; box-sizing: border-box; border-radius: 20px; background: #111118; color: #FFFFFF; font-size: 13px; font-weight: 600; white-space: nowrap; animation: ihFade 0.2s ease">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7BE0B3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>저장했어요
       </div>
     ` : null}
 
@@ -308,7 +399,7 @@ function draftH(text) {
 function pathOf(pts) {
   return pts.map((p, i) => (i ? 'L ' : 'M ') + p.x + ' ' + p.y).join(' ');
 }
-class Board extends DCLogic {
+class Page extends DCLogic {
   constructor(props) {
     super(props);
     const st = props.start || '빈 보드';
@@ -329,6 +420,11 @@ class Board extends DCLogic {
       const p = slot(7);
       strokes = [{ id: 's1', pts: circlePts(p.x + 100, p.y + 100, 138, 128) }];
     }
+    if (st === '저장 실패') {
+      cards.push(Object.assign({ id: 'm1', text: '보드 배경색도\n고를 수 있게', truth: null, g: null, marked: false, pinned: false, failed: true }, slot(24)));
+    }
+    const status = st === '불러오는 중' ? 'loading' : st === '불러오기 실패' ? 'offline' : st === '없는 보드' ? 'notfound' : 'ok';
+    if (status !== 'ok') { cards = []; editing = null; }
     this.state = {
       step: classified ? 'groups' : 'cards',
       classified: classified,
@@ -342,15 +438,24 @@ class Board extends DCLogic {
       zi: FIT,
       side: true,
       tools: true,
-      searchOpen: false,
-      q: '',
-      busy: false
+      searchOpen: st === '찾기 결과 없음',
+      q: st === '찾기 결과 없음' ? '로그인' : '',
+      busy: false,
+      status: status,
+      analyzeFail: st === '분석 실패',
+      goneNote: st === '지워진 메모',
+      acct: false,
+      savedNote: false
     };
     this.focused = null;
     this.timer = null;
+    this.loadTimer = null;
+    this.noteTimer = null;
   }
   componentWillUnmount() {
     if (this.timer) clearTimeout(this.timer);
+    if (this.loadTimer) clearTimeout(this.loadTimer);
+    if (this.noteTimer) clearTimeout(this.noteTimer);
   }
   overlaps(cards, p, skip) {
     return cards.some((c) => c.id !== skip && p.x < c.x + 214 && p.x + 214 > c.x && p.y < c.y + cardH(c.text) + 12 && p.y + 200 > c.y);
@@ -424,9 +529,10 @@ class Board extends DCLogic {
     };
   }
   classify() {
+    if (this.state.status !== 'ok') return;
     if (this.timer) clearTimeout(this.timer);
     if (this.state.editing) this.commit(this.state.editing);
-    this.setState({ busy: true, sel: null });
+    this.setState({ busy: true, sel: null, analyzeFail: false });
     this.timer = setTimeout(() => {
       const st = this.state;
       const cards = st.cards.map((c) => c.pinned ? c : Object.assign({}, c, { g: c.truth || guess(c.text) }));
@@ -494,6 +600,7 @@ class Board extends DCLogic {
         st = { pad: '28px 16px 14px 18px', r: 3, fs: 16, ai: 'flex-start', glue: 1, bg: paper, bd: '1px solid ' + (fresh ? '#E8C85A' : 'rgba(0,0,0,0.04)'), sh: STICK, rot: lean * 0.6, anim: STICK_ANIM, ink: '#2B2410', op: p.hide ? 0 : 1, pe: p.hide ? 'none' : 'auto' };      }
       if (hl && inHl) st.sh = '0 0 0 4px rgba(13,153,255,0.35)';
       if (hl && !inHl) st.op = Math.min(st.op, 0.22);
+      if (c.failed) st.bd = '2px dashed #C4314B';
       if (isSel) st.sh = SEL;
       posOf[c.id] = p;
       return Object.assign({
@@ -502,7 +609,7 @@ class Board extends DCLogic {
         marked: !!c.marked && !c.draft,
         ph: c.draft ? '적고 Enter를 누르면 메모지가 돼요' : '여기에 적어요',
         zi: editing || isSel ? 4 : 2,
-        fresh: fresh, pinned: !!c.pinned && !isCards,
+        fresh: fresh, pinned: !!c.pinned && !isCards, failed: !!c.failed,
         sel: isSel ? 'true' : 'false',
         ref: this.refFor(c.id),
         type: (e) => this.setText(c.id, e.target.value),
@@ -551,11 +658,14 @@ class Board extends DCLogic {
         if (ctx.y < 60) ctx.y = Math.round(72 + (p.y + p.h) * z) + 10;      }
     }
 
-    const showEmpty = isCards && s.cards.every((c) => c.draft && !c.text.trim());
+    const showEmpty = isCards && s.status === 'ok' && s.cards.every((c) => c.draft && !c.text.trim());
     const dc = isCards && s.editing ? s.cards.find((c) => c.id === s.editing && c.draft) : null;
     const dh = dc ? { show: true, x: dc.x + 8, y: dc.y + draftH(dc.text) + 8 } : { show: false, x: 0, y: 0 };
     const worldH = isCards ? cardsH : groupsH;
-    const hint = s.tool === 'pen' ? '드래그해서 그려요 · 다른 도구를 고르면 펜이 꺼져요'
+    const hint = s.status === 'loading' ? '보드를 불러오는 중이에요'
+      : s.status === 'offline' ? '서버에 다시 연결되면 보드가 열려요'
+      : s.status === 'notfound' ? '내 보드 목록에서 다른 보드를 골라 주세요'
+      : s.tool === 'pen' ? '드래그해서 그려요 · 다른 도구를 고르면 펜이 꺼져요'
       : s.tool === 'memo' ? '메모를 놓을 곳을 한 번 누르세요'
       : s.tool === 'mark' ? '표시할 메모를 누르세요 · 다시 누르면 해제'
       : isCards ? '빈 곳을 두 번 누르면 거기서 바로 적기 · Enter 메모지로 붙이기 · Shift+Enter 다음 줄 · 메모지를 두 번 누르면 고치기'
@@ -635,7 +745,12 @@ class Board extends DCLogic {
       }),
       classify: () => this.classify(),
       classifyLabel: s.classified ? '다시 분류' : '분류하기',
-      hasHl: !!hl, hlN: hl ? hl.length : 0,
+      hasHl: !!hl && hl.length > 0, hlN: hl ? hl.length : 0,
+      noHit: !!hl && hl.length === 0 && s.status === 'ok',
+      qText: q,
+      clearQ: () => this.setState({ q: '' }),
+      goneNote: !!s.goneNote && s.status === 'ok',
+      dismissGone: () => this.setState({ goneNote: false }),
       searchOpen: s.searchOpen, searchAttr: s.searchOpen ? 'true' : 'false', q: s.q,
       typeQ: (e) => this.setState({ q: e.target.value }),
       toggleSearch: () => this.setState({ searchOpen: !this.state.searchOpen, q: '' }),
@@ -648,14 +763,41 @@ class Board extends DCLogic {
       tSel: toolBtn('select'), tHand: toolBtn('hand'), tPen: toolBtn('pen'), tMemo: toolBtn('memo'), tMark: toolBtn('mark'),
       scrollRef: (el) => { this.scroller = el; },
       busy: s.busy,
-      hint: hint
+      hint: hint,
+      noBoard: s.status !== 'ok',
+      classifyOp: s.status !== 'ok' ? 0.4 : 1,
+      isLoading: s.status === 'loading',
+      isOffline: s.status === 'offline',
+      isNotFound: s.status === 'notfound',
+      skel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ op: n > 7 ? 0.5 : 1 })),
+      retryLoad: () => {
+        this.setState({ status: 'loading' });
+        if (this.loadTimer) clearTimeout(this.loadTimer);
+        this.loadTimer = setTimeout(() => {
+          this.setState({ status: 'ok', cards: SEED.map((x, i) => Object.assign({ id: x[0], text: x[1], truth: x[2], g: null, marked: false, pinned: false }, slot(i))) });
+        }, 900);
+      },
+      analyzeFail: s.analyzeFail && !s.busy && s.status === 'ok',
+      retryAnalyze: () => this.classify(),
+      dismissFail: () => this.setState({ analyzeFail: false }),
+      hasFailed: s.cards.some((c) => c.failed),
+      failedN: s.cards.filter((c) => c.failed).length,
+      retrySave: () => {
+        this.setState({ cards: this.state.cards.map((c) => c.failed ? Object.assign({}, c, { failed: false }) : c), savedNote: true });
+        if (this.noteTimer) clearTimeout(this.noteTimer);
+        this.noteTimer = setTimeout(() => this.setState({ savedNote: false }), 2200);
+      },
+      savedNote: s.savedNote,
+      acctOpen: s.acct,
+      acctAttr: s.acct ? 'true' : 'false',
+      toggleAcct: () => this.setState({ acct: !this.state.acct })
     };
   }
 }
 
-const params = new URLSearchParams(location.search);
-const START = { new: '빈 보드', memo: '메모', groups: '분류' };
-render(html`<${Board} start=${START[params.get('board')] || '메모'} />`, document.getElementById('app'));
+const URL_START = {'new': '빈 보드', 'groups': '분류', 'loading': '불러오는 중', 'offline': '불러오기 실패', 'notfound': '없는 보드', 'analyzefail': '분석 실패', 'savefail': '저장 실패', 'nohit': '찾기 결과 없음', 'gone': '지워진 메모'};
+const key = new URLSearchParams(location.search).get('state');
+render(html`<${Page} start=${URL_START[key] || '메모'} />`, document.getElementById('app'));
 </script>
 </body>
 </html>
