@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { boardReducer, createGroup, createIdea, mergeRemoteBoard } from '../domain/board'
 import { createApiClient, type ApiClient } from '../services/api'
 import { loadBoard, saveBoard } from '../services/storage'
@@ -15,6 +15,7 @@ export const useIdeaBoard = () => {
   const [syncState, setSyncState] = useState<SyncState>('local')
   const [syncMessage, setSyncMessage] = useState(hasRemoteConfiguration ? '서버 연결이 설정됐습니다. 필요할 때 최신 데이터를 불러오세요.' : '이 브라우저에 자동 저장됩니다.')
   const client = useMemo(() => makeClient(), [])
+  const pendingIdeaCreates = useRef(new Map<string, Promise<number>>())
 
   useEffect(() => {
     try {
@@ -46,17 +47,32 @@ export const useIdeaBoard = () => {
     const ideas = texts.map((text) => createIdea(text))
     dispatch({ type: 'ideas/add', ideas })
     await remoteTask(async (api) => {
-      const created = await Promise.all(ideas.map((idea) => api.createIdea(idea.text)))
-      created.forEach((remote, index) => dispatch({ type: 'idea/link-server', id: ideas[index].id, serverId: remote.id }))
+      const requests = ideas.map((idea) => {
+        const request = api.createIdea(idea.text).then((remote) => {
+          dispatch({ type: 'idea/link-server', id: idea.id, serverId: remote.id })
+          return remote.id
+        })
+        pendingIdeaCreates.current.set(idea.id, request)
+        return request
+      })
+      const results = await Promise.allSettled(requests)
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') pendingIdeaCreates.current.delete(ideas[index].id)
+      })
+      const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
+      if (failure) throw failure.reason
     })
   }, [remoteTask])
 
   const updateIdea = useCallback(async (idea: Idea, text: string) => {
     dispatch({ type: 'idea/update', id: idea.id, text })
     await remoteTask(async (api) => {
-      if (idea.serverId) await api.updateIdea(idea.serverId, text.trim())
+      const pendingServerId = pendingIdeaCreates.current.get(idea.id)
+      const serverId = idea.serverId ?? (pendingServerId ? await pendingServerId : undefined)
+      if (serverId) await api.updateIdea(serverId, text.trim())
       else {
         const remote = await api.createIdea(text.trim())
+        pendingIdeaCreates.current.set(idea.id, Promise.resolve(remote.id))
         dispatch({ type: 'idea/link-server', id: idea.id, serverId: remote.id })
       }
     })
@@ -64,31 +80,40 @@ export const useIdeaBoard = () => {
 
   const deleteIdea = useCallback(async (idea: Idea) => {
     dispatch({ type: 'idea/delete', id: idea.id })
-    await remoteTask(async (api) => { if (idea.serverId) await api.deleteIdea(idea.serverId) })
+    await remoteTask(async (api) => {
+      const pendingServerId = pendingIdeaCreates.current.get(idea.id)
+      const serverId = idea.serverId ?? (pendingServerId ? await pendingServerId : undefined)
+      if (serverId) await api.deleteIdea(serverId)
+      pendingIdeaCreates.current.delete(idea.id)
+    })
   }, [remoteTask])
 
   const toggleFavorite = useCallback((id: string) => dispatch({ type: 'idea/favorite', id }), [])
 
   const moveIdea = useCallback(async (idea: Idea, groupId: string | null) => {
     dispatch({ type: 'idea/move', id: idea.id, groupId })
-    const group = board.groups.find((item) => item.id === groupId)
-    await remoteTask(async (api) => { if (idea.serverId) await api.moveIdea(idea.serverId, group?.serverId ?? null) })
-  }, [board.groups, remoteTask])
+    if (client) {
+      setSyncState('local')
+      setSyncMessage('그룹 배치는 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+    }
+  }, [client])
 
   const addGroup = useCallback(async (name: string) => {
     const group = createGroup(name, board.groups.length)
     dispatch({ type: 'group/add', group })
-    await remoteTask(async (api) => {
-      const remote = await api.createGroup(group.name)
-      dispatch({ type: 'group/link-server', id: group.id, serverId: remote.id })
-    })
-  }, [board.groups.length, remoteTask])
+    if (client) {
+      setSyncState('local')
+      setSyncMessage('새 그룹은 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+    }
+  }, [board.groups.length, client])
 
   const renameGroup = useCallback(async (groupId: string, name: string) => {
-    const group = board.groups.find((item) => item.id === groupId)
     dispatch({ type: 'group/rename', id: groupId, name })
-    await remoteTask(async (api) => { if (group?.serverId) await api.renameGroup(group.serverId, name.trim()) })
-  }, [board.groups, remoteTask])
+    if (client) {
+      setSyncState('local')
+      setSyncMessage('그룹 이름은 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+    }
+  }, [client])
 
   const reloadRemote = useCallback(async () => {
     if (!client) return

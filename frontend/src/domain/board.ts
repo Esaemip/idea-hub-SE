@@ -107,19 +107,38 @@ export const filterIdeas = (ideas: Idea[], filter: FilterState): Idea[] => {
 }
 
 export const mergeRemoteBoard = (remote: Board, local: Board): Board => {
-  const localFavorites = new Map(
+  const localIdeas = new Map(
     local.ideas
       .filter((idea): idea is Idea & { serverId: number } => idea.serverId !== undefined)
-      .map((idea) => [idea.serverId, idea.favorite]),
+      .map((idea) => [idea.serverId, idea]),
+  )
+  const localGroups = new Map(
+    local.groups
+      .filter((group): group is IdeaGroup & { serverId: number } => group.serverId !== undefined)
+      .map((group) => [group.serverId, group]),
   )
   return {
     ...remote,
-    groups: [...remote.groups, ...local.groups.filter((group) => group.serverId === undefined)],
+    groups: [
+      ...remote.groups.map((group) => {
+        const localGroup = group.serverId === undefined ? undefined : localGroups.get(group.serverId)
+        return localGroup?.nameIsManual ? { ...group, name: localGroup.name, color: localGroup.color, nameIsManual: true } : group
+      }),
+      ...local.groups.filter((group) => group.serverId === undefined),
+    ],
     ideas: [
-      ...remote.ideas.map((idea) => ({
-        ...idea,
-        favorite: idea.serverId === undefined ? idea.favorite : (localFavorites.get(idea.serverId) ?? false),
-      })),
+      ...remote.ideas.map((idea) => {
+        const localIdea = idea.serverId === undefined ? undefined : localIdeas.get(idea.serverId)
+        const localIsNewer = localIdea !== undefined && Date.parse(localIdea.updatedAt) > Date.parse(idea.updatedAt)
+        return {
+          ...idea,
+          text: localIsNewer ? localIdea.text : idea.text,
+          favorite: localIdea?.favorite ?? idea.favorite,
+          groupId: localIdea?.assignmentIsManual ? localIdea.groupId : idea.groupId,
+          assignmentIsManual: localIdea?.assignmentIsManual ?? idea.assignmentIsManual,
+          updatedAt: localIsNewer ? localIdea.updatedAt : idea.updatedAt,
+        }
+      }),
       ...local.ideas.filter((idea) => idea.serverId === undefined),
     ],
   }

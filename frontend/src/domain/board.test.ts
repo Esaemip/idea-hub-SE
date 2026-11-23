@@ -44,17 +44,20 @@ describe('filterIdeas', () => {
 describe('mergeRemoteBoard', () => {
   it('preserves unsynced local work and favorites when refreshing from the server', () => {
     const local = createStarterBoard()
-    local.ideas[0] = { ...local.ideas[0], serverId: 11, favorite: true }
+    const localGroup = { ...local.groups[0], serverId: 3, name: '로컬에서 바꾼 그룹', nameIsManual: true }
+    local.groups[0] = localGroup
+    local.ideas[0] = { ...local.ideas[0], serverId: 11, text: '저장 중이던 로컬 수정', favorite: true, groupId: localGroup.id, assignmentIsManual: true, updatedAt: '2026-11-23T12:00:00.000Z' }
     const localOnlyIdea = createIdea('아직 서버에 없는 카드')
     local.ideas.push(localOnlyIdea)
 
     const remote = createStarterBoard()
-    remote.ideas = [{ ...remote.ideas[0], id: 'server-idea-11', serverId: 11, favorite: false }]
-    remote.groups = remote.groups.map((group, index) => ({ ...group, serverId: index + 1 }))
+    remote.ideas = [{ ...remote.ideas[0], id: 'server-idea-11', serverId: 11, text: '이전 서버 내용', favorite: false, groupId: null, assignmentIsManual: false, updatedAt: '2026-11-23T11:00:00.000Z' }]
+    remote.groups = remote.groups.map((group, index) => ({ ...group, serverId: index + 3 }))
 
     const merged = mergeRemoteBoard(remote, local)
 
-    expect(merged.ideas.find((idea) => idea.serverId === 11)?.favorite).toBe(true)
+    expect(merged.ideas.find((idea) => idea.serverId === 11)).toMatchObject({ text: '저장 중이던 로컬 수정', favorite: true, groupId: localGroup.id, assignmentIsManual: true })
+    expect(merged.groups.find((group) => group.serverId === 3)?.name).toBe('로컬에서 바꾼 그룹')
     expect(merged.ideas).toContainEqual(localOnlyIdea)
     expect(merged.groups).toEqual(expect.arrayContaining(local.groups.filter((group) => group.serverId === undefined)))
   })

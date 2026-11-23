@@ -69,9 +69,6 @@ export interface ApiClient {
   createIdea(text: string): Promise<RemoteIdea>
   updateIdea(id: number, text: string): Promise<RemoteIdea>
   deleteIdea(id: number): Promise<void>
-  createGroup(name: string): Promise<RemoteGroup>
-  renameGroup(id: number, name: string): Promise<RemoteGroup>
-  moveIdea(ideaId: number, groupId: number | null): Promise<RemoteIdea>
 }
 
 export const createApiClient = (baseUrl: string, boardId: number): ApiClient => {
@@ -103,8 +100,5 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
     createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
     updateIdea: (id, text) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'PATCH', body: JSON.stringify({ text }) }),
     deleteIdea: (id) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'DELETE' }),
-    createGroup: (name) => request(base, `/boards/${boardId}/groups`, { method: 'POST', body: JSON.stringify({ name }) }),
-    renameGroup: (id, name) => request(base, `/boards/${boardId}/groups/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) }),
-    moveIdea: (ideaId, groupId) => request(base, `/boards/${boardId}/ideas/${ideaId}/group`, { method: 'PATCH', body: JSON.stringify({ group_id: groupId }) }),
   }
 }
