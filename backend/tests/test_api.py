@@ -55,6 +55,69 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['access-control-allow-origin'], 'http://localhost:5173')
 
+    def test_group_rename_and_manual_card_assignment_survive_restart(self):
+        board = self.client.post("/boards", json={"title": "회의"}).json()
+        board_url = f"/boards/{board['id']}"
+        created = self.client.post(f"{board_url}/groups", json={"name": "로그인"})
+        self.assertEqual(created.status_code, 201)
+        group = created.json()
+        self.assertIs(group["name_is_manual"], True)
+        group_id = group["id"]
+        renamed = self.client.patch(f"{board_url}/groups/{group_id}", json={"name": "계정 기능"})
+        self.assertEqual(renamed.status_code, 200)
+        self.assertIs(renamed.json()["name_is_manual"], True)
+
+        card = self.client.post(f"{board_url}/ideas", json={"text": "소셜 로그인"}).json()
+        move_url = f"{board_url}/ideas/{card['id']}/group"
+        moved = self.client.patch(move_url, json={"group_id": group_id})
+        self.assertEqual(moved.status_code, 200)
+        self.assertEqual(moved.json()["group_id"], group_id)
+        self.assertIs(moved.json()["assignment_is_manual"], True)
+
+        with TestClient(create_app(self.path)) as restarted:
+            board = restarted.get(board_url).json()
+            self.assertEqual(board["groups"][0]["name"], "계정 기능")
+            self.assertEqual(board["ideas"][0]["group_id"], group_id)
+            unclassified = restarted.patch(move_url, json={"group_id": None})
+            self.assertEqual(unclassified.status_code, 200)
+            self.assertIsNone(unclassified.json()["group_id"])
+            self.assertIs(unclassified.json()["assignment_is_manual"], True)
+
+    def test_group_deletion_preserves_its_cards(self):
+        board = self.client.post("/boards", json={"title": "A"}).json()
+        board_url = f"/boards/{board['id']}"
+        group = self.client.post(f"{board_url}/groups", json={"name": "계정"}).json()
+        card = self.client.post(f"{board_url}/ideas", json={"text": "로그인"}).json()
+        self.client.patch(f"{board_url}/ideas/{card['id']}/group", json={"group_id": group["id"]})
+
+        deleted = self.client.delete(f"{board_url}/groups/{group['id']}")
+        self.assertEqual(deleted.status_code, 204)
+        self.assertEqual(deleted.content, b"")
+        board = self.client.get(board_url).json()
+        self.assertEqual(board["groups"], [])
+        self.assertEqual(board["ideas"][0]["id"], card["id"])
+        self.assertIsNone(board["ideas"][0]["group_id"])
+        self.assertIs(board["ideas"][0]["assignment_is_manual"], True)
+
+    def test_group_validation_and_board_isolation(self):
+        first = self.client.post("/boards", json={"title": "A"}).json()["id"]
+        second = self.client.post("/boards", json={"title": "B"}).json()["id"]
+        group = self.client.post(f"/boards/{second}/groups", json={"name": "계정"}).json()
+        group_id = group["id"]
+        card = self.client.post(f"/boards/{first}/ideas", json={"text": "로그인"}).json()
+        move_url = f"/boards/{first}/ideas/{card['id']}/group"
+        wrong_group_url = f"/boards/{first}/groups/{group_id}"
+
+        self.assertEqual(self.client.post(f"/boards/{first}/groups", json={"name": " "}).status_code, 422)
+        for invalid in ({}, {"group_id": str(group_id)}, {"group_id": True}, {"group_id": 2**63}):
+            with self.subTest(payload=invalid):
+                self.assertEqual(self.client.patch(move_url, json=invalid).status_code, 422)
+        self.assertEqual(self.client.patch(move_url, json={"group_id": group_id}).status_code, 404)
+        self.assertEqual(self.client.patch(wrong_group_url, json={"name": "변경"}).status_code, 404)
+        self.assertEqual(self.client.delete(wrong_group_url).status_code, 404)
+        self.assertEqual(self.client.get(f"/boards/{second}").json()["groups"], [group])
+        self.assertIs(self.client.get(f"/boards/{first}").json()["ideas"][0]["assignment_is_manual"], False)
+
 
 if __name__ == '__main__':
     unittest.main()
