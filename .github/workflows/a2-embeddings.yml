@@ -1,0 +1,40 @@
+name: A2 embedding smoke test
+on:
+  pull_request:
+    paths:
+      - ai/embeddings.py
+      - ai/requirements.txt
+      - .github/workflows/a2-embeddings.yml
+permissions:
+  contents: read
+jobs:
+  inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -r ai/requirements.txt
+      - name: Check real Korean card embeddings
+        run: |
+          python - <<'PY'
+          import numpy as np
+          from ai.embeddings import embed_ideas
+          cards = [
+              {"id": 9, "text": "마감 전에 알려줘"},
+              {"id": 3, "text": "  마감   전에 알려줘 "},
+              {"id": 5, "text": "식당 메뉴를 추천해 줘"},
+          ]
+          rows = embed_ideas(cards)
+          assert [row["id"] for row in rows] == [9, 3, 5]
+          vectors = np.asarray([row["embedding"] for row in rows])
+          assert vectors.shape == (3, 768)
+          assert np.isfinite(vectors).all()
+          np.testing.assert_allclose(np.linalg.norm(vectors, axis=1), 1, atol=1e-5)
+          np.testing.assert_allclose(vectors[0], vectors[1], atol=1e-5)
+          assert not np.allclose(vectors[0], vectors[2])
+          print("Passed:", vectors.shape)
+          PY
