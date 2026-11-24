@@ -1,9 +1,11 @@
+from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
 from fastapi.testclient import TestClient
 
+from backend.database import connect
 from backend.main import create_app
 
 
@@ -117,6 +119,69 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(self.client.delete(wrong_group_url).status_code, 404)
         self.assertEqual(self.client.get(f"/boards/{second}").json()["groups"], [group])
         self.assertIs(self.client.get(f"/boards/{first}").json()["ideas"][0]["assignment_is_manual"], False)
+
+
+    def test_mock_analysis_groups_new_cards_without_writing_to_database(self):
+        board = self.client.post("/boards", json={"title": "기획 회의"}).json()
+        board_url = f"/boards/{board['id']}"
+        for text in ("마감 알림", "제출 전에 알려주기", "메뉴 추천"):
+            self.assertEqual(
+                self.client.post(f"{board_url}/ideas", json={"text": text}).status_code,
+                201,
+            )
+        saved = self.client.get(board_url).json()
+
+        result = self.client.post(f"{board_url}/analyze", json={})
+        self.assertEqual(result.status_code, 200)
+        preview = result.json()
+        self.assertEqual(preview.keys(), saved.keys())
+        self.assertEqual(preview["id"], saved["id"])
+        self.assertEqual(len(preview["groups"]), 1)
+        group = preview["groups"][0]
+        self.assertLess(group["id"], 0)
+        self.assertEqual(group["board_id"], board["id"])
+        self.assertEqual([card["id"] for card in preview["ideas"]], [card["id"] for card in saved["ideas"]])
+        self.assertEqual(
+            [card["group_id"] for card in preview["ideas"]],
+            [group["id"], group["id"], None],
+        )
+        self.assertTrue(all(card["analyzed_at"] is not None for card in preview["ideas"]))
+        self.assertEqual(self.client.get(board_url).json(), saved)
+        with closing(connect(self.path)) as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM analysis_results").fetchone()[0], 0)
+
+    def test_mock_analysis_keeps_manual_and_previously_analyzed_cards(self):
+        board = self.client.post("/boards", json={"title": "기획 회의"}).json()
+        board_url = f"/boards/{board['id']}"
+        group = self.client.post(f"{board_url}/groups", json={"name": "기존 그룹"}).json()
+        cards = [
+            self.client.post(f"{board_url}/ideas", json={"text": text}).json()
+            for text in ("수동 배정", "미분류로 고정", "이전 분석", "새 카드")
+        ]
+        for card, group_id in ((cards[0], group["id"]), (cards[1], None)):
+            self.assertEqual(
+                self.client.patch(f"{board_url}/ideas/{card['id']}/group", json={"group_id": group_id}).status_code,
+                200,
+            )
+        with closing(connect(self.path)) as db, db:
+            db.execute(
+                "UPDATE ideas SET analyzed_at = created_at WHERE id = ?",
+                (cards[2]["id"],),
+            )
+        saved = self.client.get(board_url).json()
+
+        preview = self.client.post(f"{board_url}/analyze", json={}).json()
+        self.assertEqual(preview["groups"], saved["groups"])
+        self.assertEqual(preview["ideas"][:3], saved["ideas"][:3])
+        self.assertIsNone(preview["ideas"][3]["group_id"])
+        self.assertIsNotNone(preview["ideas"][3]["analyzed_at"])
+
+    def test_mock_analysis_empty_board_and_missing_board(self):
+        board = self.client.post("/boards", json={"title": "빈 보드"}).json()
+        board_url = f"/boards/{board['id']}"
+        current = self.client.get(board_url).json()
+        self.assertEqual(self.client.post(f"{board_url}/analyze", json={}).json(), current)
+        self.assertEqual(self.client.post("/boards/999/analyze", json={}).status_code, 404)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, StrictInt, field_validator
 
 from backend.database import DEFAULT_DATABASE, connect, initialize_database
+from backend.mock_analysis import preview_analysis
 
 
 class BoardCreate(BaseModel):
@@ -113,9 +114,9 @@ def create_app(database_path: str | Path = DEFAULT_DATABASE) -> FastAPI:
             cursor = db.execute("INSERT INTO boards (title) VALUES (?)", (data.title,))
             return get_board(db, cursor.lastrowid)
 
-    @app.get("/boards/{board_id}")
-    def read_board(board_id: int):
+    def load_board_detail(board_id: int):
         with closing(connect(database_path)) as db:
+            db.execute("BEGIN")
             board = get_board(db, board_id)
             groups = [group_response(row) for row in db.execute(
                 "SELECT * FROM groups WHERE board_id = ? ORDER BY id", (board_id,)
@@ -127,6 +128,14 @@ def create_app(database_path: str | Path = DEFAULT_DATABASE) -> FastAPI:
                 idea["assignment_is_manual"] = bool(idea["assignment_is_manual"])
             board.update(groups=groups, ideas=ideas)
             return board
+
+    @app.get("/boards/{board_id}")
+    def read_board(board_id: int):
+        return load_board_detail(board_id)
+
+    @app.post("/boards/{board_id}/analyze", summary="아이디어 분석 미리보기 (Mock)")
+    def analyze_board(board_id: int):
+        return preview_analysis(load_board_detail(board_id))
 
     @app.delete("/boards/{board_id}", status_code=status.HTTP_204_NO_CONTENT)
     def delete_board(board_id: int):
