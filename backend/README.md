@@ -2,7 +2,7 @@
 
 보드·카드·그룹 API와 데이터 저장을 구현하는 공간입니다.
 
-## 보드·카드 API 실행
+## API 실행
 
 저장소 루트에서 Python 3.12 이상을 사용합니다.
 
@@ -13,9 +13,20 @@ python -m pip install -r backend/requirements.txt
 python -m uvicorn backend.main:app --reload
 ```
 
-서버가 켜지면 `http://127.0.0.1:8000/docs`에서 요청을 실행해 볼 수 있습니다. 보드 목록·생성·상세·삭제와 아이디어 생성·수정·삭제를 제공합니다. DB와 테이블은 서버가 시작될 때 준비됩니다. 그룹 수정과 AI 분석은 후속 작업입니다.
+서버가 켜지면 `http://127.0.0.1:8000/docs`에서 요청을 실행해 볼 수 있습니다. DB와 테이블은 서버가 시작될 때 준비됩니다.
 
 로컬 프론트엔드 주소는 `http://localhost:5173` 또는 `http://127.0.0.1:5173`을 허용합니다. 다른 포트를 사용하면 프론트엔드 담당자와 주소를 맞춰 설정을 변경해야 합니다.
+
+## 그룹과 카드 이동
+
+| 기능 | API | 요청 본문 | 성공 응답 |
+|---|---|---|---|
+| 그룹 생성 | `POST /boards/{board_id}/groups` | `{"name":"계정 관리"}` | 201, 새 그룹 |
+| 그룹명 수정 | `PATCH /boards/{board_id}/groups/{group_id}` | `{"name":"계정 기능"}` | 200, 수정된 그룹 |
+| 그룹 삭제 | `DELETE /boards/{board_id}/groups/{group_id}` | 없음 | 204 |
+| 카드 이동 | `PATCH /boards/{board_id}/ideas/{idea_id}/group` | `{"group_id":10}` 또는 `{"group_id":null}` | 200, 수정된 카드 |
+
+직접 만들거나 이름을 바꾼 그룹은 `name_is_manual: true`로 기록됩니다. 카드 이동은 `assignment_is_manual: true`로 기록되며, `group_id: null`을 보내면 미분류로 이동합니다. 그룹을 삭제하면 해당 카드를 미분류로 옮기고 수동 배정으로 표시합니다. 같은 보드 안의 카드와 그룹만 연결할 수 있으며, 해당 보드에서 찾을 수 없는 ID는 404를 반환합니다.
 
 ## SQLite DB 준비
 
