@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea hub — 계정 설정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+@keyframes ihFade{from{opacity:0}to{opacity:1}}
+@keyframes ihPop{from{opacity:0;transform:translateY(8px) scale(0.98)}to{opacity:1;transform:none}}
+input:focus-visible{outline:2px solid #0D99FF;outline-offset:1px}
+button:focus-visible,a:focus-visible{outline:2px solid #0D99FF;outline-offset:2px}
+</style>
+<script>
+/* htm (Apache-2.0, LICENSE-htm.txt) + Preact (MIT, Copyright (c) 2015-present Jason Miller) — 파일 하나로 열리도록 그대로 넣었어요 */
+!function(e,n){"object"==typeof exports&&"undefined"!=typeof module?n(exports):"function"==typeof define&&define.amd?define(["exports"],n):n(e.htmPreact={})}(this,function(e){var n,_,t,o,r,u,l,i={},c=[],f=/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;function s(e,n){for(var _ in n)e[_]=n[_];return e}function a(e){var n=e.parentNode;n&&n.removeChild(e)}function p(e,_,t){var o,r,u,l={};for(u in _)"key"==u?o=_[u]:"ref"==u?r=_[u]:l[u]=_[u];if(arguments.length>2&&(l.children=arguments.length>3?n.call(arguments,2):t),"function"==typeof e&&null!=e.defaultProps)for(u in e.defaultProps)void 0===l[u]&&(l[u]=e.defaultProps[u]);return h(e,l,o,r,null)}function h(e,n,o,r,u){var l={type:e,props:n,key:o,ref:r,__k:null,__:null,__b:0,__e:null,__d:void 0,__c:null,__h:null,constructor:void 0,__v:null==u?++t:u};return null!=_.vnode&&_.vnode(l),l}function d(e){return e.children}function v(e,n){this.props=e,this.context=n}function y(e,n){if(null==n)return e.__?y(e.__,e.__.__k.indexOf(e)+1):null;for(var _;n<e.__k.length;n++)if(null!=(_=e.__k[n])&&null!=_.__e)return _.__e;return"function"==typeof e.type?y(e):null}function m(e){var n,_;if(null!=(e=e.__)&&null!=e.__c){for(e.__e=e.__c.base=null,n=0;n<e.__k.length;n++)if(null!=(_=e.__k[n])&&null!=_.__e){e.__e=e.__c.base=_.__e;break}return m(e)}}function g(e){(!e.__d&&(e.__d=!0)&&o.push(e)&&!k.__r++||u!==_.debounceRendering)&&((u=_.debounceRendering)||r)(k)}function k(){for(var e;k.__r=o.length;)e=o.sort(function(e,n){return e.__v.__b-n.__v.__b}),o=[],e.some(function(e){var n,_,t,o,r,u;e.__d&&(r=(o=(n=e).__v).__e,(u=n.__P)&&(_=[],(t=s({},o)).__v=o.__v+1,D(u,o,t,n.__n,void 0!==u.ownerSVGElement,null!=o.__h?[r]:null,_,null==r?y(o):r,o.__h),w(_,o),o.__e!=r&&m(o)))})}function b(e,n,_,t,o,r,u,l,f,s){var a,p,v,m,g,k,b,H=t&&t.__k||c,E=H.length;for(_.__k=[],a=0;a<n.length;a++)if(null!=(m=_.__k[a]=null==(m=n[a])||"boolean"==typeof m?null:"string"==typeof m||"number"==typeof m||"bigint"==typeof m?h(null,m,null,null,m):Array.isArray(m)?h(d,{children:m},null,null,null):m.__b>0?h(m.type,m.props,m.key,null,m.__v):m)){if(m.__=_,m.__b=_.__b+1,null===(v=H[a])||v&&m.key==v.key&&m.type===v.type)H[a]=void 0;else for(p=0;p<E;p++){if((v=H[p])&&m.key==v.key&&m.type===v.type){H[p]=void 0;break}v=null}D(e,m,v=v||i,o,r,u,l,f,s),g=m.__e,(p=m.ref)&&v.ref!=p&&(b||(b=[]),v.ref&&b.push(v.ref,null,m),b.push(p,m.__c||g,m)),null!=g?(null==k&&(k=g),"function"==typeof m.type&&null!=m.__k&&m.__k===v.__k?m.__d=f=C(m,f,e):f=x(e,m,v,H,g,f),s||"option"!==_.type?"function"==typeof _.type&&(_.__d=f):e.value=""):f&&v.__e==f&&f.parentNode!=e&&(f=y(v))}for(_.__e=k,a=E;a--;)null!=H[a]&&("function"==typeof _.type&&null!=H[a].__e&&H[a].__e==_.__d&&(_.__d=y(t,a+1)),A(H[a],H[a]));if(b)for(a=0;a<b.length;a++)U(b[a],b[++a],b[++a])}function C(e,n,_){var t,o;for(t=0;t<e.__k.length;t++)(o=e.__k[t])&&(o.__=e,n="function"==typeof o.type?C(o,n,_):x(_,o,o,e.__k,o.__e,n));return n}function x(e,n,_,t,o,r){var u,l,i;if(void 0!==n.__d)u=n.__d,n.__d=void 0;else if(null==_||o!=r||null==o.parentNode)e:if(null==r||r.parentNode!==e)e.appendChild(o),u=null;else{for(l=r,i=0;(l=l.nextSibling)&&i<t.length;i+=2)if(l==o)break e;e.insertBefore(o,r),u=r}return void 0!==u?u:o.nextSibling}function H(e,n,_){"-"===n[0]?e.setProperty(n,_):e[n]=null==_?"":"number"!=typeof _||f.test(n)?_:_+"px"}function E(e,n,_,t,o){var r;e:if("style"===n)if("string"==typeof _)e.style.cssText=_;else{if("string"==typeof t&&(e.style.cssText=t=""),t)for(n in t)_&&n in _||H(e.style,n,"");if(_)for(n in _)t&&_[n]===t[n]||H(e.style,n,_[n])}else if("o"===n[0]&&"n"===n[1])r=n!==(n=n.replace(/Capture$/,"")),n=n.toLowerCase()in e?n.toLowerCase().slice(2):n.slice(2),e.l||(e.l={}),e.l[n+r]=_,_?t||e.addEventListener(n,r?S:P,r):e.removeEventListener(n,r?S:P,r);else if("dangerouslySetInnerHTML"!==n){if(o)n=n.replace(/xlink[H:h]/,"h").replace(/sName$/,"s");else if("href"!==n&&"list"!==n&&"form"!==n&&"tabIndex"!==n&&"download"!==n&&n in e)try{e[n]=null==_?"":_;break e}catch(e){}"function"==typeof _||(null!=_&&(!1!==_||"a"===n[0]&&"r"===n[1])?e.setAttribute(n,_):e.removeAttribute(n))}}function P(e){this.l[e.type+!1](_.event?_.event(e):e)}function S(e){this.l[e.type+!0](_.event?_.event(e):e)}function D(e,n,t,o,r,u,l,i,c){var f,a,p,h,y,m,g,k,C,x,H,E=n.type;if(void 0!==n.constructor)return null;null!=t.__h&&(c=t.__h,i=n.__e=t.__e,n.__h=null,u=[i]),(f=_.__b)&&f(n);try{e:if("function"==typeof E){if(k=n.props,C=(f=E.contextType)&&o[f.__c],x=f?C?C.props.value:f.__:o,t.__c?g=(a=n.__c=t.__c).__=a.__E:("prototype"in E&&E.prototype.render?n.__c=a=new E(k,x):(n.__c=a=new v(k,x),a.constructor=E,a.render=M),C&&C.sub(a),a.props=k,a.state||(a.state={}),a.context=x,a.__n=o,p=a.__d=!0,a.__h=[]),null==a.__s&&(a.__s=a.state),null!=E.getDerivedStateFromProps&&(a.__s==a.state&&(a.__s=s({},a.__s)),s(a.__s,E.getDerivedStateFromProps(k,a.__s))),h=a.props,y=a.state,p)null==E.getDerivedStateFromProps&&null!=a.componentWillMount&&a.componentWillMount(),null!=a.componentDidMount&&a.__h.push(a.componentDidMount);else{if(null==E.getDerivedStateFromProps&&k!==h&&null!=a.componentWillReceiveProps&&a.componentWillReceiveProps(k,x),!a.__e&&null!=a.shouldComponentUpdate&&!1===a.shouldComponentUpdate(k,a.__s,x)||n.__v===t.__v){a.props=k,a.state=a.__s,n.__v!==t.__v&&(a.__d=!1),a.__v=n,n.__e=t.__e,n.__k=t.__k,n.__k.forEach(function(e){e&&(e.__=n)}),a.__h.length&&l.push(a);break e}null!=a.componentWillUpdate&&a.componentWillUpdate(k,a.__s,x),null!=a.componentDidUpdate&&a.__h.push(function(){a.componentDidUpdate(h,y,m)})}a.context=x,a.props=k,a.state=a.__s,(f=_.__r)&&f(n),a.__d=!1,a.__v=n,a.__P=e,f=a.render(a.props,a.state,a.context),a.state=a.__s,null!=a.getChildContext&&(o=s(s({},o),a.getChildContext())),p||null==a.getSnapshotBeforeUpdate||(m=a.getSnapshotBeforeUpdate(h,y)),H=null!=f&&f.type===d&&null==f.key?f.props.children:f,b(e,Array.isArray(H)?H:[H],n,t,o,r,u,l,i,c),a.base=n.__e,n.__h=null,a.__h.length&&l.push(a),g&&(a.__E=a.__=null),a.__e=!1}else null==u&&n.__v===t.__v?(n.__k=t.__k,n.__e=t.__e):n.__e=T(t.__e,n,t,o,r,u,l,c);(f=_.diffed)&&f(n)}catch(e){n.__v=null,(c||null!=u)&&(n.__e=i,n.__h=!!c,u[u.indexOf(i)]=null),_.__e(e,n,t)}}function w(e,n){_.__c&&_.__c(n,e),e.some(function(n){try{e=n.__h,n.__h=[],e.some(function(e){e.call(n)})}catch(e){_.__e(e,n.__v)}})}function T(e,_,t,o,r,u,l,c){var f,s,p,h=t.props,d=_.props,v=_.type,m=0;if("svg"===v&&(r=!0),null!=u)for(;m<u.length;m++)if((f=u[m])&&(f===e||(v?f.localName==v:3==f.nodeType))){e=f,u[m]=null;break}if(null==e){if(null===v)return document.createTextNode(d);e=r?document.createElementNS("http://www.w3.org/2000/svg",v):document.createElement(v,d.is&&d),u=null,c=!1}if(null===v)h===d||c&&e.data===d||(e.data=d);else{if(u=u&&n.call(e.childNodes),s=(h=t.props||i).dangerouslySetInnerHTML,p=d.dangerouslySetInnerHTML,!c){if(null!=u)for(h={},m=0;m<e.attributes.length;m++)h[e.attributes[m].name]=e.attributes[m].value;(p||s)&&(p&&(s&&p.__html==s.__html||p.__html===e.innerHTML)||(e.innerHTML=p&&p.__html||""))}if(function(e,n,_,t,o){var r;for(r in _)"children"===r||"key"===r||r in n||E(e,r,null,_[r],t);for(r in n)o&&"function"!=typeof n[r]||"children"===r||"key"===r||"value"===r||"checked"===r||_[r]===n[r]||E(e,r,n[r],_[r],t)}(e,d,h,r,c),p)_.__k=[];else if(m=_.props.children,b(e,Array.isArray(m)?m:[m],_,t,o,r&&"foreignObject"!==v,u,l,u?u[0]:t.__k&&y(t,0),c),null!=u)for(m=u.length;m--;)null!=u[m]&&a(u[m]);c||("value"in d&&void 0!==(m=d.value)&&(m!==e.value||"progress"===v&&!m)&&E(e,"value",m,h.value,!1),"checked"in d&&void 0!==(m=d.checked)&&m!==e.checked&&E(e,"checked",m,h.checked,!1))}return e}function U(e,n,t){try{"function"==typeof e?e(n):e.current=n}catch(e){_.__e(e,t)}}function A(e,n,t){var o,r;if(_.unmount&&_.unmount(e),(o=e.ref)&&(o.current&&o.current!==e.__e||U(o,null,n)),null!=(o=e.__c)){if(o.componentWillUnmount)try{o.componentWillUnmount()}catch(e){_.__e(e,n)}o.base=o.__P=null}if(o=e.__k)for(r=0;r<o.length;r++)o[r]&&A(o[r],n,"function"!=typeof e.type);t||null==e.__e||a(e.__e),e.__e=e.__d=void 0}function M(e,n,_){return this.constructor(e,_)}n=c.slice,_={__e:function(e,n){for(var _,t,o;n=n.__;)if((_=n.__c)&&!_.__)try{if((t=_.constructor)&&null!=t.getDerivedStateFromError&&(_.setState(t.getDerivedStateFromError(e)),o=_.__d),null!=_.componentDidCatch&&(_.componentDidCatch(e),o=_.__d),o)return _.__E=_}catch(n){e=n}throw e}},t=0,v.prototype.setState=function(e,n){var _;_=null!=this.__s&&this.__s!==this.state?this.__s:this.__s=s({},this.state),"function"==typeof e&&(e=e(s({},_),this.props)),e&&s(_,e),null!=e&&this.__v&&(n&&this.__h.push(n),g(this))},v.prototype.forceUpdate=function(e){this.__v&&(this.__e=!0,e&&this.__h.push(e),g(this))},v.prototype.render=d,o=[],r="function"==typeof Promise?Promise.prototype.then.bind(Promise.resolve()):setTimeout,k.__r=0,l=0;var F,L,N,W=0,R=[],I=_.__b,O=_.__r,V=_.diffed,q=_.__c,B=_.unmount;function $(e,n){_.__h&&_.__h(L,e,W||n),W=0;var t=L.__H||(L.__H={__:[],__h:[]});return e>=t.__.length&&t.__.push({}),t.__[e]}function j(e){return W=1,G(ee,e)}function G(e,n,_){var t=$(F++,2);return t.t=e,t.__c||(t.__=[_?_(n):ee(void 0,n),function(e){var n=t.t(t.__[0],e);t.__[0]!==n&&(t.__=[n,t.__[1]],t.__c.setState({}))}],t.__c=L),t.__}function z(e,n){var t=$(F++,4);!_.__s&&Z(t.__H,n)&&(t.__=e,t.__H=n,L.__h.push(t))}function J(e,n){var _=$(F++,7);return Z(_.__H,n)&&(_.__=e(),_.__H=n,_.__h=e),_.__}function K(){R.forEach(function(e){if(e.__P)try{e.__H.__h.forEach(X),e.__H.__h.forEach(Y),e.__H.__h=[]}catch(n){e.__H.__h=[],_.__e(n,e.__v)}}),R=[]}_.__b=function(e){L=null,I&&I(e)},_.__r=function(e){O&&O(e),F=0;var n=(L=e.__c).__H;n&&(n.__h.forEach(X),n.__h.forEach(Y),n.__h=[])},_.diffed=function(e){V&&V(e);var n=e.__c;n&&n.__H&&n.__H.__h.length&&(1!==R.push(n)&&N===_.requestAnimationFrame||((N=_.requestAnimationFrame)||function(e){var n,_=function(){clearTimeout(t),Q&&cancelAnimationFrame(n),setTimeout(e)},t=setTimeout(_,100);Q&&(n=requestAnimationFrame(_))})(K)),L=void 0},_.__c=function(e,n){n.some(function(e){try{e.__h.forEach(X),e.__h=e.__h.filter(function(e){return!e.__||Y(e)})}catch(t){n.some(function(e){e.__h&&(e.__h=[])}),n=[],_.__e(t,e.__v)}}),q&&q(e,n)},_.unmount=function(e){B&&B(e);var n=e.__c;if(n&&n.__H)try{n.__H.__.forEach(X)}catch(e){_.__e(e,n.__v)}};var Q="function"==typeof requestAnimationFrame;function X(e){var n=L;"function"==typeof e.__c&&e.__c(),L=n}function Y(e){var n=L;e.__c=e.__(),L=n}function Z(e,n){return!e||e.length!==n.length||n.some(function(n,_){return n!==e[_]})}function ee(e,n){return"function"==typeof n?n(e):n}var ne=function(e,n,_,t){var o;n[0]=0;for(var r=1;r<n.length;r++){var u=n[r++],l=n[r]?(n[0]|=u?1:2,_[n[r++]]):n[++r];3===u?t[0]=l:4===u?t[1]=Object.assign(t[1]||{},l):5===u?(t[1]=t[1]||{})[n[++r]]=l:6===u?t[1][n[++r]]+=l+"":u?(o=e.apply(l,ne(e,l,_,["",null])),t.push(o),l[0]?n[0]|=2:(n[r-2]=0,n[r]=o)):t.push(l)}return t},_e=new Map,te=function(e){var n=_e.get(this);return n||(n=new Map,_e.set(this,n)),(n=ne(this,n.get(e)||(n.set(e,n=function(e){for(var n,_,t=1,o="",r="",u=[0],l=function(e){1===t&&(e||(o=o.replace(/^\s*\n\s*|\s*\n\s*$/g,"")))?u.push(0,e,o):3===t&&(e||o)?(u.push(3,e,o),t=2):2===t&&"..."===o&&e?u.push(4,e,0):2===t&&o&&!e?u.push(5,0,!0,o):t>=5&&((o||!e&&5===t)&&(u.push(t,0,o,_),t=6),e&&(u.push(t,e,0,_),t=6)),o=""},i=0;i<e.length;i++){i&&(1===t&&l(),l(i));for(var c=0;c<e[i].length;c++)n=e[i][c],1===t?"<"===n?(l(),u=[u],t=3):o+=n:4===t?"--"===o&&">"===n?(t=1,o=""):o=n+o[0]:r?n===r?r="":o+=n:'"'===n||"'"===n?r=n:">"===n?(l(),t=1):t&&("="===n?(t=5,_=o,o=""):"/"===n&&(t<5||">"===e[i][c+1])?(l(),3===t&&(u=u[0]),t=u,(u=u[0]).push(2,0,t),t=0):" "===n||"\t"===n||"\n"===n||"\r"===n?(l(),t=2):o+=n),3===t&&"!--"===o&&(t=4,u=u[0])}return l(),u}(e)),n),arguments,[])).length>1?n:n[0]}.bind(p);e.h=p,e.html=te,e.render=function(e,t,o){var r,u,l;_.__&&_.__(e,t),u=(r="function"==typeof o)?null:o&&o.__k||t.__k,l=[],D(t,e=(!r&&o||t).__k=p(d,null,[e]),u||i,i,void 0!==t.ownerSVGElement,!r&&o?[o]:u?null:t.firstChild?n.call(t.childNodes):null,l,!r&&o?o:u?u.__e:t.firstChild,r),w(l,e)},e.Component=v,e.createContext=function(e,n){var _={__c:n="__cC"+l++,__:e,Consumer:function(e,n){return e.children(n)},Provider:function(e){var _,t;return this.getChildContext||(_=[],(t={})[n]=this,this.getChildContext=function(){return t},this.shouldComponentUpdate=function(e){this.props.value!==e.value&&_.some(g)},this.sub=function(e){_.push(e);var n=e.componentWillUnmount;e.componentWillUnmount=function(){_.splice(_.indexOf(e),1),n&&n.call(e)}}),e.children}};return _.Provider.__=_.Consumer.contextType=_},e.useState=j,e.useReducer=G,e.useEffect=function(e,n){var t=$(F++,3);!_.__s&&Z(t.__H,n)&&(t.__=e,t.__H=n,L.__H.__h.push(t))},e.useLayoutEffect=z,e.useRef=function(e){return W=5,J(function(){return{current:e}},[])},e.useImperativeHandle=function(e,n,_){W=6,z(function(){"function"==typeof e?e(n()):e&&(e.current=n())},null==_?_:_.concat(e))},e.useMemo=J,e.useCallback=function(e,n){return W=8,J(function(){return e},n)},e.useContext=function(e){var n=L.context[e.__c],_=$(F++,9);return _.c=e,n?(null==_.__&&(_.__=!0,n.sub(L)),n.props.value):e.__},e.useDebugValue=function(e,n){_.useDebugValue&&_.useDebugValue(n?n(e):e)},e.useErrorBoundary=function(e){var n=$(F++,10),_=j();return n.__=e,L.componentDidCatch||(L.componentDidCatch=function(e){n.__&&n.__(e),_[1](e)}),[_[0],function(){_[1](void 0)}]}});
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* 아이디어 허브 · 화면 시안 (feature/board-ui). 화면 구조는 render() 안의 템플릿, 동작은 Page 클래스에 있어요. */
+const { html, render, Component } = window.htmPreact;
+
+class DCLogic extends Component {
+  componentDidMount() { this.flushFocus(); }
+  componentDidUpdate() { this.flushFocus(); }
+  flushFocus() {
+    const go = this.pendingFocus;
+    this.pendingFocus = null;
+    if (go) go();
+  }
+  render() {
+    const V = this.renderVals();
+    return html`<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #FAFAF7; font-family: Inter, 'Noto Sans KR', system-ui, sans-serif; color: #111118; font-size: 14px">
+
+  <aside aria-label="메뉴" style="flex: 1 1 248px; box-sizing: border-box; padding: 14px 10px 12px; background: #F7F7F8; border-right: 1px solid #ECECEF; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px 14px">
+      <svg width="24" height="24" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="#111118"></rect><g stroke="#55586A" stroke-width="1.3" stroke-linecap="round"><line x1="14" y1="14" x2="14" y2="5.5"></line><line x1="14" y1="14" x2="22.1" y2="11.4"></line><line x1="14" y1="14" x2="19" y2="20.9"></line><line x1="14" y1="14" x2="9" y2="20.9"></line><line x1="14" y1="14" x2="5.9" y2="11.4"></line></g><circle cx="14" cy="5.5" r="2.3" fill="#5B8DF5"></circle><circle cx="22.1" cy="11.4" r="2.3" fill="#F28A45"></circle><circle cx="19" cy="20.9" r="2.3" fill="#A974E8"></circle><circle cx="9" cy="20.9" r="2.3" fill="#2DB88A"></circle><circle cx="5.9" cy="11.4" r="2.3" fill="#E9608F"></circle><circle cx="14" cy="14" r="3.3" fill="#FFFFFF"></circle></svg>
+      <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.2px">Idea hub</span>
+    </div>
+    <nav aria-label="보드 메뉴" style="display: flex; flex-direction: column; gap: 2px">
+      <a href="boards.html?state=new" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #111118; text-decoration: none; font-size: 14px; font-weight: 600">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>새로운 메모 보드 만들기
+      </a>
+      <a href="boards.html" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; color: #3C3F4A; text-decoration: none; font-size: 14px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>프로젝트
+      </a>
+      <span aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; background: #ECECF0; color: #111118; font-size: 14px; font-weight: 600">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>계정 설정
+      </span>
+    </nav>
+    <span style="flex: 1; min-height: 24px"></span>
+    <div style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 8px 10px 0; border-top: 1px solid #E6E6EA">
+      <span style="flex: none; width: 30px; height: 30px; border-radius: 15px; background: #E3E3E8; color: #3C3F4A; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">재</span>
+      <span style="font-size: 13px; color: #3C3F4A">${V.savedName} 님</span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px 56px">
+    <div style="max-width: 720px; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.6px">계정 설정</h1>
+        <p style="margin: 0; font-size: 14px; color: #5C5F6A">이름, 비밀번호, 복구 코드를 관리해요.</p>
+      </div>
+
+      <section aria-labelledby="sec-profile" style="background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+        <h2 id="sec-profile" style="margin: 0; font-size: 17px; font-weight: 700">프로필</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px">
+          <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 6px">
+            <label for="ac-name" style="font-size: 13px; font-weight: 600; color: #3C3F4A">이름</label>
+            <input id="ac-name" autocomplete="name" value="${V.name}" onInput="${V.setName}" aria-invalid="${V.nm.inv}" style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1.5px solid ${V.nm.bd}; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #111118" />
+            ${V.nm.has ? html`<span style="font-size: 13px; color: #C4314B">${V.nm.msg}</span>` : null}
+          </div>
+          <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; font-weight: 600; color: #3C3F4A">이메일 (로그인 아이디)</span>
+            <span style="height: 46px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; background: #F4F4F6; display: flex; align-items: center; font-size: 15px; color: #3C3F4A">jaehwan@example.com</span>
+            <span style="font-size: 12.5px; color: #6B6E79">로그인 아이디라 바꿀 수 없어요.</span>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end">
+          <button type="button" onClick="${V.saveName}" disabled="${V.nameSame}" style="height: 42px; padding: 0 18px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; opacity: ${V.nameOp}">저장</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-pw" style="background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+        <h2 id="sec-pw" style="margin: 0; font-size: 17px; font-weight: 700">비밀번호 바꾸기</h2>
+        <div style="display: flex; flex-direction: column; gap: 14px; max-width: 420px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="ac-cur" style="font-size: 13px; font-weight: 600; color: #3C3F4A">지금 비밀번호</label>
+            <input id="ac-cur" type="password" autocomplete="current-password" value="${V.pw.cur}" onInput="${V.setCur}" aria-invalid="${V.pc.inv}" style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1.5px solid ${V.pc.bd}; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #111118" />
+            ${V.pc.has ? html`<span style="font-size: 13px; color: #C4314B">${V.pc.msg}</span>` : null}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="ac-new" style="font-size: 13px; font-weight: 600; color: #3C3F4A">새 비밀번호</label>
+            <input id="ac-new" type="password" autocomplete="new-password" value="${V.pw.next}" onInput="${V.setNext}" aria-invalid="${V.pn.inv}" style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1.5px solid ${V.pn.bd}; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #111118" />
+            <div style="display: flex; gap: 14px; flex-wrap: wrap">
+              ${(V.checks).map((c, i) => html`
+                <span key=${c._k || i} style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: ${c.fw}; color: ${c.color}">
+                  ${c.ok ? html`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>` : null}
+                  ${c.no ? html`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle></svg>` : null}
+                  ${c.label}
+                </span>
+              `)}
+            </div>
+            ${V.pn.has ? html`<span style="font-size: 13px; color: #C4314B">${V.pn.msg}</span>` : null}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="ac-new2" style="font-size: 13px; font-weight: 600; color: #3C3F4A">새 비밀번호 확인</label>
+            <input id="ac-new2" type="password" autocomplete="new-password" value="${V.pw.next2}" onInput="${V.setNext2}" aria-invalid="${V.pn2.inv}" style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1.5px solid ${V.pn2.bd}; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #111118" />
+            ${V.pn2.has ? html`<span style="font-size: 13px; color: #C4314B">${V.pn2.msg}</span>` : null}
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end">
+          <button type="button" onClick="${V.changePw}" style="height: 42px; padding: 0 18px; border: none; border-radius: 12px; background: #111118; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">비밀번호 바꾸기</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="sec-code" style="background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="sec-code" style="margin: 0; font-size: 17px; font-weight: 700">복구 코드</h2>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4A4D57">비밀번호를 잊었을 때 쓰는 코드예요. 서버에는 알아볼 수 없게 바꿔서 보관하기 때문에 지금 코드를 다시 보여 드릴 수는 없어요. 잃어버렸다면 새로 만들어 주세요.</p>
+        ${V.regenIdle ? html`
+          <div>
+            <button type="button" onClick="${V.startRegen}" style="height: 42px; padding: 0 16px; border: 1.5px solid #DCDCE2; border-radius: 12px; background: #FFFFFF; color: #111118; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">새 복구 코드 만들기</button>
+          </div>
+        ` : null}
+        ${V.regenConfirm ? html`
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 12px; background: #FAFAF7; border: 1px solid #ECECEF; animation: ihFade 0.2s ease">
+            <span style="font-size: 13.5px; line-height: 1.55; color: #3C3F4A">새 코드를 만들면 <strong>예전 코드는 바로 못 쓰게 돼요.</strong> 본인인지 확인하려고 비밀번호를 한 번 더 받을게요.</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start">
+              <div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px">
+                <label for="ac-regen" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">비밀번호 확인</label>
+                <input id="ac-regen" type="password" autocomplete="current-password" value="${V.regenPw}" onInput="${V.setRegenPw}" placeholder="지금 비밀번호" aria-invalid="${V.rg.inv}" style="width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px; border: 1.5px solid ${V.rg.bd}; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; color: #111118" />
+                ${V.rg.has ? html`<span style="font-size: 13px; color: #C4314B">${V.rg.msg}</span>` : null}
+              </div>
+              <button type="button" onClick="${V.cancelRegen}" style="height: 42px; padding: 0 14px; border: 1.5px solid #DCDCE2; border-radius: 10px; background: #FFFFFF; color: #111118; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">취소</button>
+              <button type="button" onClick="${V.doRegen}" style="height: 42px; padding: 0 14px; border: none; border-radius: 10px; background: #111118; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">새로 만들기</button>
+            </div>
+          </div>
+        ` : null}
+        ${V.regenDone ? html`
+          <div role="status" style="display: flex; flex-direction: column; gap: 10px; animation: ihFade 0.2s ease">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 16px; border-radius: 12px; background: #FAFAF7; border: 1.5px dashed #C9CAD3">
+              <span aria-label="새 복구 코드" style="flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 22px; font-weight: 700; letter-spacing: 2px">${V.newCode}</span>
+              <button type="button" onClick="${V.copyCode}" style="flex: none; height: 38px; padding: 0 14px; border: 1.5px solid #DCDCE2; border-radius: 10px; background: #FFFFFF; color: #111118; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">${V.copyLabel}</button>
+            </div>
+            <span style="font-size: 13px; font-weight: 600; color: #8E5A00">이 코드는 지금 한 번만 보여요. 안전한 곳에 적어 두세요.</span>
+          </div>
+        ` : null}
+      </section>
+
+      <section aria-labelledby="sec-out" style="background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="sec-out" style="margin: 0; font-size: 17px; font-weight: 700">로그아웃 · 탈퇴</h2>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #EEEEF1">
+          <span style="font-size: 14px; color: #4A4D57">이 기기에서 로그아웃해요.</span>
+          <a href="login.html" style="display: inline-flex; align-items: center; gap: 6px; height: 42px; padding: 0 16px; box-sizing: border-box; border: 1.5px solid #DCDCE2; border-radius: 12px; background: #FFFFFF; color: #111118; text-decoration: none; font-size: 14px; font-weight: 700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>로그아웃
+          </a>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 14px; color: #A3203A">회원 탈퇴</strong><span style="font-size: 13.5px; color: #4A4D57">내 계정과 내가 만든 보드·메모가 모두 지워지고 되돌릴 수 없어요.</span></span>
+          <button type="button" onClick="${V.openDelete}" style="height: 42px; padding: 0 16px; border: 1.5px solid #E7A4B1; border-radius: 12px; background: #FFFFFF; color: #A3203A; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">탈퇴하기</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  ${V.delOpen ? html`
+    <div style="position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 30; box-sizing: border-box; padding: 16px; display: flex; align-items: center; justify-content: center; background: rgba(17,17,24,0.42); animation: ihFade 0.15s ease">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-desc" onKeyDown="${V.dialogKey}" style="width: 100%; max-width: 460px; box-sizing: border-box; padding: 24px; border-radius: 18px; background: #FFFFFF; box-shadow: 0 24px 60px rgba(17,17,24,0.28); display: flex; flex-direction: column; gap: 16px; animation: ihPop 0.2s ease">
+        <span style="width: 48px; height: 48px; border-radius: 24px; background: #FDECEF; color: #C4314B; display: inline-flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6"></path><path d="M16 17l5 5M21 17l-5 5"></path></svg></span>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="del-title" style="margin: 0; font-size: 20px; font-weight: 700">정말 탈퇴할까요?</h2>
+          <ul id="del-desc" style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.55; color: #4A4D57">
+            <li>내가 만든 보드 4개와 메모 50개가 함께 지워져요.</li>
+            <li>지운 내용은 되돌릴 수 없어요.</li>
+            <li>같은 이메일로 다시 가입할 수는 있어요.</li>
+          </ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="del-pw" style="font-size: 13px; font-weight: 600; color: #3C3F4A">확인을 위해 비밀번호를 적어 주세요</label>
+          <input id="del-pw" ref="${V.delRef}" type="password" autocomplete="current-password" value="${V.delPw}" onInput="${V.setDelPw}" aria-invalid="${V.dp.inv}" style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1.5px solid ${V.dp.bd}; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 15px; color: #111118" />
+          ${V.dp.has ? html`<span style="font-size: 13px; color: #C4314B">${V.dp.msg}</span>` : null}
+        </div>
+        <div style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px">
+          <button type="button" onClick="${V.closeDelete}" style="height: 44px; padding: 0 18px; border: 1.5px solid #DCDCE2; border-radius: 12px; background: #FFFFFF; color: #111118; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">취소</button>
+          <a href="${V.delHref}" onClick="${V.doDelete}" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 12px; background: #C4314B; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 700">탈퇴하기</a>
+        </div>
+      </div>
+    </div>
+  ` : null}
+
+  ${V.toastShow ? html`
+    <div role="status" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 40; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px; box-sizing: border-box; border-radius: 22px; background: #111118; color: #FFFFFF; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 12px 32px rgba(17,17,24,0.25); animation: ihPop 0.2s ease">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7BE0B3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>${V.toastText}
+    </div>
+  ` : null}
+</div>`;
+  }
+}
+
+const RED = '#C4314B';
+const LINE = '#DCDCE2';
+const NEW_CODE = 'P2VJ-6TYK-1MCS';
+function field(msg) {
+  return { msg: msg, has: !!msg, bd: msg ? RED : LINE, inv: msg ? 'true' : 'false' };
+}
+function pwChecks(pw) {
+  return [
+    { label: '8자 이상', ok: pw.length >= 8 },
+    { label: '영문 포함', ok: /[A-Za-z]/.test(pw) },
+    { label: '숫자 포함', ok: /[0-9]/.test(pw) }
+  ];
+}
+class Page extends DCLogic {
+  constructor(props) {
+    super(props);
+    const del = props.start === '탈퇴 확인';
+    this.state = {
+      name: '이재환', savedName: '이재환', nameTried: false,
+      cur: '', next: '', next2: '', pwTried: false,
+      regen: 'idle', regenPw: '', regenTried: false, copied: false,
+      delOpen: del, delPw: '', delTried: false,
+      toast: ''
+    };
+    this.toastTimer = null;
+    this.delFocused = false;
+  }
+  componentWillUnmount() {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+  }
+  say(text) {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.setState({ toast: text });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+  renderVals() {
+    const s = this.state;
+    const nameErr = s.name.trim() ? '' : '이름을 적어 주세요.';
+    const checks = pwChecks(s.next);
+    const pwOk = checks.every((c) => c.ok);
+    const curErr = s.cur ? '' : '지금 비밀번호를 적어 주세요.';
+    const nextErr = !s.next ? '새 비밀번호를 적어 주세요.' : !pwOk ? '위 조건을 모두 채워 주세요.' : s.next === s.cur ? '지금 비밀번호와 다르게 정해 주세요.' : '';
+    const next2Err = !s.next2 ? '새 비밀번호를 한 번 더 적어 주세요.' : s.next2 !== s.next ? '비밀번호가 서로 달라요.' : '';
+    const regenErr = s.regenPw ? '' : '비밀번호를 적어 주세요.';
+    const delErr = s.delPw ? '' : '비밀번호를 적어야 탈퇴할 수 있어요.';
+    const showPw = (m) => (s.pwTried ? m : '');
+    return {
+      name: s.name,
+      savedName: s.savedName,
+      setName: (e) => this.setState({ name: e.target.value }),
+      nm: field(s.nameTried ? nameErr : ''),
+      nameSame: s.name.trim() === s.savedName,
+      nameOp: s.name.trim() === s.savedName ? 0.4 : 1,
+      saveName: () => {
+        if (nameErr) { this.setState({ nameTried: true }); return; }
+        this.setState({ savedName: this.state.name.trim(), name: this.state.name.trim(), nameTried: false });
+        this.say('이름을 바꿨어요');
+      },
+      pw: { cur: s.cur, next: s.next, next2: s.next2 },
+      setCur: (e) => this.setState({ cur: e.target.value }),
+      setNext: (e) => this.setState({ next: e.target.value }),
+      setNext2: (e) => this.setState({ next2: e.target.value }),
+      pc: field(showPw(curErr)),
+      pn: field(showPw(nextErr)),
+      pn2: field(showPw(next2Err)),
+      checks: checks.map((c) => ({ label: c.label, ok: c.ok, no: !c.ok, color: c.ok ? '#0E7A55' : '#6B6E79', fw: c.ok ? 700 : 500 })),
+      changePw: () => {
+        if (curErr || nextErr || next2Err) { this.setState({ pwTried: true }); return; }
+        this.setState({ cur: '', next: '', next2: '', pwTried: false });
+        this.say('비밀번호를 바꿨어요');
+      },
+      regenIdle: s.regen === 'idle',
+      regenConfirm: s.regen === 'confirm',
+      regenDone: s.regen === 'done',
+      startRegen: () => this.setState({ regen: 'confirm', regenPw: '', regenTried: false }),
+      cancelRegen: () => this.setState({ regen: 'idle', regenPw: '', regenTried: false }),
+      regenPw: s.regenPw,
+      setRegenPw: (e) => this.setState({ regenPw: e.target.value }),
+      rg: field(s.regenTried ? regenErr : ''),
+      doRegen: () => {
+        if (regenErr) { this.setState({ regenTried: true }); return; }
+        this.setState({ regen: 'done', regenPw: '', copied: false });
+      },
+      newCode: NEW_CODE,
+      copyLabel: s.copied ? '복사했어요' : '복사',
+      copyCode: () => {
+        try { if (navigator.clipboard) navigator.clipboard.writeText(NEW_CODE); } catch (err) {}
+        this.setState({ copied: true });
+      },
+      delOpen: s.delOpen,
+      openDelete: () => { this.delFocused = false; this.setState({ delOpen: true, delPw: '', delTried: false }); },
+      closeDelete: () => this.setState({ delOpen: false }),
+      dialogKey: (e) => { if (e.key === 'Escape') { e.preventDefault(); this.setState({ delOpen: false }); } },
+      delRef: (el) => { if (el && !this.delFocused) { this.delFocused = true; el.focus(); } },
+      delPw: s.delPw,
+      setDelPw: (e) => this.setState({ delPw: e.target.value }),
+      dp: field(s.delTried ? delErr : ''),
+      delHref: delErr ? '#del-pw' : 'login.html',
+      doDelete: (e) => {
+        if (delErr) {
+          if (e && e.preventDefault) e.preventDefault();
+          this.setState({ delTried: true });
+        }
+      },
+      toastShow: !!s.toast,
+      toastText: s.toast
+    };
+  }
+}
+
+const URL_START = {'delete': '탈퇴 확인'};
+const key = new URLSearchParams(location.search).get('state');
+render(html`<${Page} start=${URL_START[key] || '계정 설정'} />`, document.getElementById('app'));
+</script>
+</body>
+</html>
