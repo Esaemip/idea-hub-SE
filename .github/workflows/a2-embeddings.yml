@@ -2,6 +2,8 @@ name: A2 embedding smoke test
 on:
   pull_request:
     paths:
+      - ai/grouping.py
+      - ai/test_grouping.py
       - ai/similarity.py
       - ai/embeddings.py
       - ai/requirements.txt
@@ -55,3 +57,7 @@ jobs:
               print("PAIR", pair["left_id"], pair["right_id"], round(pair["similarity"], 6))
           assert pairs[0]["similarity"] > max(p["similarity"] for p in pairs[1:])
           PY
+      - name: Verify P2 incremental grouping
+        env:
+          IDEA_HUB_REAL_MODEL: '1'
+        run: python -m unittest -v ai.test_grouping
