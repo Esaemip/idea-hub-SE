@@ -1,9 +1,15 @@
 import { useState, type KeyboardEvent } from 'react'
 import { MAX_IDEA_LENGTH, validateIdea } from '../domain/board'
 
-interface IdeaComposerProps { onAdd: (text: string) => Promise<void>; onOpenBulk: () => void }
+interface IdeaComposerProps {
+  onAdd: (text: string) => Promise<void>
+  onOpenBulk: () => void
+  onAnalyze: () => Promise<void>
+  analyzing: boolean
+  remoteEnabled: boolean
+}
 
-export function IdeaComposer({ onAdd, onOpenBulk }: IdeaComposerProps) {
+export function IdeaComposer({ onAdd, onOpenBulk, onAnalyze, analyzing, remoteEnabled }: IdeaComposerProps) {
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -34,6 +40,7 @@ export function IdeaComposer({ onAdd, onOpenBulk }: IdeaComposerProps) {
         <textarea id="idea-input" value={text} maxLength={MAX_IDEA_LENGTH} onChange={(event) => { setText(event.target.value); if (error) setError('') }} onKeyDown={handleKeyDown} placeholder="예: 회의가 끝나면 결정 사항을 자동으로 정리하기" aria-describedby={error ? 'idea-error' : 'idea-help'} rows={2} />
         <div className="composer-controls">
           <span id="idea-help" className="char-count">{text.length}/{MAX_IDEA_LENGTH}</span>
+          <button className="button analyze" type="button" onClick={() => void onAnalyze()} disabled={!remoteEnabled || analyzing} title={remoteEnabled ? '서버의 분석 결과를 미리 봅니다.' : '서버 연결 후 사용할 수 있어요.'}>{analyzing ? '분석 중…' : '아이디어 분석'}</button>
           <button className="button secondary" type="button" onClick={onOpenBulk}>여러 개 입력</button>
           <button className="button primary" type="button" onClick={() => void submit()} disabled={saving}>{saving ? '추가 중…' : '아이디어 추가'}</button>
         </div>

@@ -26,6 +26,29 @@ interface RemoteBoard {
 const palette = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
 const REQUEST_TIMEOUT_MS = 10_000
 
+const toBoard = (remote: RemoteBoard): Board => {
+  if (!Array.isArray(remote.groups) || !Array.isArray(remote.ideas)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
+  const groups: IdeaGroup[] = remote.groups.map((group, index) => ({
+    id: `server-group-${group.id}`,
+    serverId: group.id,
+    name: group.name,
+    nameIsManual: group.name_is_manual,
+    color: palette[index % palette.length],
+  }))
+  const groupIds = new Map(groups.map((group) => [group.serverId, group.id]))
+  const ideas: Idea[] = remote.ideas.map((idea) => ({
+    id: `server-idea-${idea.id}`,
+    serverId: idea.id,
+    text: idea.text,
+    groupId: idea.group_id === null ? null : groupIds.get(idea.group_id) ?? null,
+    favorite: false,
+    assignmentIsManual: idea.assignment_is_manual,
+    createdAt: idea.created_at,
+    updatedAt: idea.updated_at,
+  }))
+  return { id: `server-board-${remote.id}`, serverId: remote.id, title: remote.title, groups, ideas, updatedAt: remote.updated_at }
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message)
@@ -77,9 +100,12 @@ const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Pr
 
 export interface ApiClient {
   loadBoard(): Promise<Board>
+  analyzeBoard(): Promise<Board>
   createIdea(text: string): Promise<RemoteIdea>
   updateIdea(id: number, text: string): Promise<RemoteIdea>
   deleteIdea(id: number): Promise<void>
+  renameGroup(id: number, name: string): Promise<RemoteGroup>
+  moveIdea(id: number, groupId: number | null): Promise<RemoteIdea>
 }
 
 export const createApiClient = (baseUrl: string, boardId: number): ApiClient => {
@@ -87,26 +113,11 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
   return {
     async loadBoard() {
       const remote = await request<RemoteBoard>(base, `/boards/${boardId}`)
-      if (!Array.isArray(remote.groups) || !Array.isArray(remote.ideas)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
-      const groups: IdeaGroup[] = remote.groups.map((group, index) => ({
-        id: `server-group-${group.id}`,
-        serverId: group.id,
-        name: group.name,
-        nameIsManual: group.name_is_manual,
-        color: palette[index % palette.length],
-      }))
-      const groupIds = new Map(groups.map((group) => [group.serverId, group.id]))
-      const ideas: Idea[] = remote.ideas.map((idea) => ({
-        id: `server-idea-${idea.id}`,
-        serverId: idea.id,
-        text: idea.text,
-        groupId: idea.group_id === null ? null : groupIds.get(idea.group_id) ?? null,
-        favorite: false,
-        assignmentIsManual: idea.assignment_is_manual,
-        createdAt: idea.created_at,
-        updatedAt: idea.updated_at,
-      }))
-      return { id: `server-board-${remote.id}`, serverId: remote.id, title: remote.title, groups, ideas, updatedAt: remote.updated_at }
+      return toBoard(remote)
+    },
+    async analyzeBoard() {
+      const remote = await request<RemoteBoard>(base, `/boards/${boardId}/analyze`, { method: 'POST' })
+      return toBoard(remote)
     },
     createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
     updateIdea: (id, text) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'PATCH', body: JSON.stringify({ text }) }),
@@ -117,6 +128,14 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
         if (error instanceof ApiError && error.status === 404) return
         throw error
       }
+    },
+    renameGroup(id, name) {
+      if (id <= 0) return Promise.reject(new ApiError('분석 미리보기 그룹은 수정할 수 없어요.', 400))
+      return request(base, `/boards/${boardId}/groups/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) })
+    },
+    moveIdea(id, groupId) {
+      if (groupId !== null && groupId <= 0) return Promise.reject(new ApiError('분석 미리보기 그룹으로 카드를 이동할 수 없어요.', 400))
+      return request(base, `/boards/${boardId}/ideas/${id}/group`, { method: 'PATCH', body: JSON.stringify({ group_id: groupId }) })
     },
   }
 }

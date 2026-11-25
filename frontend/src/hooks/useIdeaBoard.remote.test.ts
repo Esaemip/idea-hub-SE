@@ -7,6 +7,12 @@ afterEach(() => {
 })
 
 describe('useIdeaBoard remote synchronization', () => {
+  const serverBoard = {
+    id: 'server-board-1', serverId: 1, title: '보드', updatedAt: '2026-11-25T00:00:00.000Z',
+    groups: [{ id: 'server-group-4', serverId: 4, name: '저장 그룹', nameIsManual: false, color: '#2f6feb' }],
+    ideas: [{ id: 'server-idea-7', serverId: 7, text: '서버 카드', groupId: null, favorite: false, assignmentIsManual: false, createdAt: '2026-11-25T00:00:00.000Z', updatedAt: '2026-11-25T00:00:00.000Z' }],
+  }
+
   it('waits for a pending create before updating the same card', async () => {
     vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
     vi.stubEnv('VITE_BOARD_ID', '1')
@@ -94,5 +100,56 @@ describe('useIdeaBoard remote synchronization', () => {
 
     expect(result.current.syncState).toBe('error')
     expect(result.current.syncMessage).toContain('서버에 연결할 수 없어요.')
+  })
+
+  it('shows analysis results but preserves the current screen when analysis fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubEnv('VITE_BOARD_ID', '1')
+    vi.resetModules()
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify(serverBoard))
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+      .mockRejectedValueOnce(new TypeError('network down'))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 1, title: '보드', updated_at: '2026-11-25T01:00:00.000Z',
+        groups: [{ id: 4, name: '저장 그룹', name_is_manual: false }, { id: -1, name: '예시 그룹', name_is_manual: false }],
+        ideas: [{ id: 7, text: '서버 카드', group_id: -1, assignment_is_manual: false, created_at: '2026-11-25T00:00:00.000Z', updated_at: '2026-11-25T00:00:00.000Z' }],
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    const { useIdeaBoard } = await import('./useIdeaBoard')
+    const { result } = renderHook(() => useIdeaBoard())
+
+    const before = result.current.board
+    await act(async () => { await result.current.analyzeBoard() })
+    expect(result.current.board).toEqual(before)
+    expect(result.current.syncMessage).toContain('기존 화면은 그대로 유지했습니다.')
+
+    await act(async () => { await result.current.analyzeBoard() })
+    expect(result.current.board.groups).toContainEqual(expect.objectContaining({ serverId: -1, name: '예시 그룹' }))
+    expect(result.current.board.ideas[0].groupId).toBe('server-group--1')
+    expect(fetchMock.mock.calls.every(([, init]) => init?.method === 'POST')).toBe(true)
+  })
+
+  it('connects persisted groups to B3 and never requests changes for preview groups', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubEnv('VITE_BOARD_ID', '1')
+    vi.resetModules()
+    const board = {
+      ...serverBoard,
+      groups: [...serverBoard.groups, { id: 'server-group--1', serverId: -1, name: '예시 그룹', nameIsManual: false, color: '#8b3fd9' }],
+      ideas: [{ ...serverBoard.ideas[0], groupId: 'server-group--1' }],
+    }
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify(board))
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 4, name: '변경', name_is_manual: true }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    const { useIdeaBoard } = await import('./useIdeaBoard')
+    const { result } = renderHook(() => useIdeaBoard())
+
+    await act(async () => { await result.current.renameGroup('server-group--1', '금지') })
+    await act(async () => { await result.current.moveIdea(result.current.board.ideas[0], null) })
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(result.current.board.groups[1].name).toBe('예시 그룹')
+    expect(result.current.board.ideas[0].groupId).toBe('server-group--1')
+
+    await act(async () => { await result.current.renameGroup('server-group-4', '변경') })
+    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/1/groups/4', expect.objectContaining({ method: 'PATCH' }))
+    expect(result.current.board.groups[0].name).toBe('변경')
   })
 })

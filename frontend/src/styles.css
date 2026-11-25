@@ -48,6 +48,8 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
 .button.primary { background: var(--accent); color: white; }
 .button.primary:hover:not(:disabled) { background: var(--accent-dark); }
 .button.secondary { background: white; color: var(--ink); border-color: #d8d7df; }
+.button.analyze { color: #211d48; background: #c8c4ff; border-color: #dedbff; }
+.button.analyze:hover:not(:disabled) { background: #dedbff; }
 .button.ghost { background: transparent; border-color: #d8d7df; }
 .button.compact { min-height: 34px; padding: 0 11px; font-size: 12px; }
 
@@ -65,10 +67,12 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
 .board-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(270px, 1fr)); align-items: start; gap: 16px; }
 .group-column, .add-group-form { min-height: 210px; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.74); transition: border .16s, background .16s, transform .16s; }
 .group-column.drag-over { border: 2px dashed var(--group-color); background: white; transform: translateY(-2px); }
+.group-column.preview-group { border-style: dashed; background: #f8f7ff; }
 .group-header { min-height: 45px; display: flex; align-items: flex-start; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #ebeae5; }
 .group-color { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--group-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--group-color) 13%, transparent); }
 .group-header > div:not(.rename-form) { flex: 1; }
 .group-header h2 { margin: 0 0 3px; font-size: 15px; }
+.preview-badge { display: inline-block; margin-left: 4px; padding: 3px 6px; border-radius: 999px; color: #574bc4; background: #ebe8ff; font-size: 9px; vertical-align: 1px; }
 .group-header p { margin: 0; color: var(--muted); font-size: 11px; }
 .card-list { display: grid; gap: 10px; padding-top: 12px; }
 .empty-group { margin: 4px 0; min-height: 95px; border: 1px dashed #d5d4cd; border-radius: 12px; color: #989992; display: grid; place-items: center; text-align: center; font-size: 12px; }
@@ -77,6 +81,7 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
 .idea-card:hover { border-color: color-mix(in srgb, var(--group-color) 45%, #dedde5); box-shadow: 0 8px 22px rgba(27,27,35,.08); }
 .card-topline { min-height: 20px; display: flex; justify-content: space-between; align-items: center; }
 .drag-handle { color: #b2b2b8; cursor: grab; }
+.drag-handle.locked { color: #d1d0d6; cursor: not-allowed; }
 .icon-button { width: 30px; height: 30px; padding: 0; display: inline-grid; place-items: center; border: 0; border-radius: 8px; background: transparent; cursor: pointer; color: #74757d; }
 .icon-button:hover { background: #f0efeb; color: var(--ink); }
 .icon-button.star { color: #bbb8a9; }

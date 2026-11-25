@@ -9,6 +9,40 @@ describe('createApiClient', () => {
     await createApiClient('http://localhost:8000/', 3).createIdea('새 카드')
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/3/ideas', expect.objectContaining({ method: 'POST', body: JSON.stringify({ text: '새 카드' }) }))
   })
+  it('maps the analysis preview and keeps its negative group ID', async () => {
+    const response = {
+      id: 3, title: '분석 보드', updated_at: '2026-11-25T01:00:00Z',
+      groups: [{ id: -1, name: '예시 그룹', name_is_manual: false }],
+      ideas: [{ id: 7, text: '분석 카드', group_id: -1, assignment_is_manual: false, created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' }],
+    }
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(response), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+
+    const board = await createApiClient('http://localhost:8000', 3).analyzeBoard()
+
+    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/3/analyze', expect.objectContaining({ method: 'POST' }))
+    expect(board.groups[0]).toMatchObject({ id: 'server-group--1', serverId: -1 })
+    expect(board.ideas[0].groupId).toBe('server-group--1')
+  })
+  it('uses the B3 group rename and card move contracts', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 4, name: '변경', name_is_manual: true }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 7, group_id: 4 }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    const api = createApiClient('http://localhost:8000', 3)
+
+    await api.renameGroup(4, '변경')
+    await api.moveIdea(7, 4)
+
+    expect(fetchMock.mock.calls[0]).toEqual(['http://localhost:8000/boards/3/groups/4', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ name: '변경' }) })])
+    expect(fetchMock.mock.calls[1]).toEqual(['http://localhost:8000/boards/3/ideas/7/group', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ group_id: 4 }) })])
+  })
+  it('rejects preview group mutations before making a request', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+    const api = createApiClient('http://localhost:8000', 3)
+
+    await expect(api.renameGroup(-1, '변경 금지')).rejects.toEqual(new ApiError('분석 미리보기 그룹은 수정할 수 없어요.', 400))
+    await expect(api.moveIdea(7, -1)).rejects.toEqual(new ApiError('분석 미리보기 그룹으로 카드를 이동할 수 없어요.', 400))
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
   it('surfaces the server detail message', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ detail: '아이디어를 찾을 수 없습니다.' }), { status: 404, headers: { 'Content-Type': 'application/json' } }))
     await expect(createApiClient('http://localhost:8000', 1).updateIdea(99, '수정')).rejects.toEqual(new ApiError('아이디어를 찾을 수 없습니다.', 404))

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { boardReducer, createGroup, createIdea, mergeRemoteBoard } from '../domain/board'
+import { boardReducer, createGroup, createIdea, isAnalysisPreviewGroup, mergeRemoteBoard } from '../domain/board'
 import { createApiClient, type ApiClient } from '../services/api'
 import { loadBoard, saveBoard } from '../services/storage'
 import type { Idea, SyncState } from '../types'
@@ -13,10 +13,14 @@ const makeClient = (): ApiClient | null => hasRemoteConfiguration ? createApiCli
 export const useIdeaBoard = () => {
   const [board, dispatch] = useReducer(boardReducer, undefined, loadBoard)
   const [syncState, setSyncState] = useState<SyncState>('local')
+  const [analyzing, setAnalyzing] = useState(false)
   const [syncMessage, setSyncMessage] = useState(hasRemoteConfiguration ? '서버 연결이 설정됐습니다. 필요할 때 최신 데이터를 불러오세요.' : '이 브라우저에 자동 저장됩니다.')
   const client = useMemo(() => makeClient(), [])
   const pendingIdeaCreates = useRef(new Map<string, Promise<number>>())
   const syncBatch = useRef({ active: 0, failed: false, errorMessage: '' })
+  const boardRef = useRef(board)
+
+  useEffect(() => { boardRef.current = board }, [board])
 
   useEffect(() => {
     try {
@@ -30,7 +34,10 @@ export const useIdeaBoard = () => {
     }
   }, [board])
 
-  const remoteTask = useCallback(async (task: (api: ApiClient) => Promise<void>): Promise<boolean> => {
+  const remoteTask = useCallback(async (
+    task: (api: ApiClient) => Promise<void>,
+    messages = { pending: '서버에 저장하는 중…', success: '서버와 동기화됐습니다.', preserved: '로컬 변경은 보존했습니다.' },
+  ): Promise<boolean> => {
     if (!client) return true
     const batch = syncBatch.current
     if (batch.active === 0) {
@@ -39,14 +46,14 @@ export const useIdeaBoard = () => {
     }
     batch.active += 1
     setSyncState('syncing')
-    setSyncMessage('서버에 저장하는 중…')
+    setSyncMessage(messages.pending)
     let succeeded = true
     try {
       await task(client)
     } catch (error) {
       succeeded = false
       batch.failed = true
-      batch.errorMessage = error instanceof Error ? `${error.message} 로컬 변경은 보존했습니다.` : '서버 저장에 실패했지만 로컬 변경은 보존했습니다.'
+      batch.errorMessage = error instanceof Error ? `${error.message} ${messages.preserved}` : `서버 요청에 실패했지만 ${messages.preserved}`
     } finally {
       batch.active -= 1
       if (batch.active === 0) {
@@ -55,7 +62,7 @@ export const useIdeaBoard = () => {
           setSyncMessage(batch.errorMessage)
         } else {
           setSyncState('synced')
-          setSyncMessage('서버와 동기화됐습니다.')
+          setSyncMessage(messages.success)
         }
       }
     }
@@ -115,12 +122,30 @@ export const useIdeaBoard = () => {
   const toggleFavorite = useCallback((id: string) => dispatch({ type: 'idea/favorite', id }), [])
 
   const moveIdea = useCallback(async (idea: Idea, groupId: string | null) => {
-    dispatch({ type: 'idea/move', id: idea.id, groupId })
-    if (client) {
+    const currentBoard = boardRef.current
+    const sourceGroup = currentBoard.groups.find((group) => group.id === idea.groupId)
+    const targetGroup = currentBoard.groups.find((group) => group.id === groupId)
+    if (isAnalysisPreviewGroup(sourceGroup) || isAnalysisPreviewGroup(targetGroup)) {
       setSyncState('local')
-      setSyncMessage('그룹 배치는 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+      setSyncMessage('분석 미리보기 그룹의 카드는 이동할 수 없어요. 서버에서 새로고침하면 미리보기가 사라집니다.')
+      return
     }
-  }, [client])
+    if (!client || (groupId !== null && targetGroup?.serverId === undefined)) {
+      dispatch({ type: 'idea/move', id: idea.id, groupId })
+      if (client) {
+        setSyncState('local')
+        setSyncMessage('로컬 그룹 배치는 이 브라우저에 보존됩니다.')
+      }
+      return
+    }
+    await remoteTask(async (api) => {
+      const pendingServerId = pendingIdeaCreates.current.get(idea.id)
+      const serverId = idea.serverId ?? (pendingServerId ? await pendingServerId : undefined)
+      if (!serverId) throw new Error('카드가 아직 서버에 저장되지 않았어요.')
+      await api.moveIdea(serverId, targetGroup?.serverId ?? null)
+      dispatch({ type: 'idea/move', id: idea.id, groupId })
+    })
+  }, [client, remoteTask])
 
   const addGroup = useCallback(async (name: string) => {
     const group = createGroup(name, board.groups.length)
@@ -132,12 +157,43 @@ export const useIdeaBoard = () => {
   }, [board.groups.length, client])
 
   const renameGroup = useCallback(async (groupId: string, name: string) => {
-    dispatch({ type: 'group/rename', id: groupId, name })
-    if (client) {
+    const group = boardRef.current.groups.find((item) => item.id === groupId)
+    if (!group || isAnalysisPreviewGroup(group)) {
       setSyncState('local')
-      setSyncMessage('그룹 이름은 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+      setSyncMessage('분석 미리보기 그룹의 이름은 변경할 수 없어요.')
+      return
     }
-  }, [client])
+    if (!client || group.serverId === undefined) {
+      dispatch({ type: 'group/rename', id: groupId, name })
+      if (client) {
+        setSyncState('local')
+        setSyncMessage('로컬 그룹 이름은 이 브라우저에 보존됩니다.')
+      }
+      return
+    }
+    const serverId = group.serverId
+    await remoteTask(async (api) => {
+      await api.renameGroup(serverId, name.trim())
+      dispatch({ type: 'group/rename', id: groupId, name })
+    })
+  }, [client, remoteTask])
+
+  const analyzeBoard = useCallback(async () => {
+    if (!client || analyzing) return
+    setAnalyzing(true)
+    try {
+      await remoteTask(async (api) => {
+        const analyzed = await api.analyzeBoard()
+        dispatch({ type: 'hydrate', board: mergeRemoteBoard(analyzed, boardRef.current) })
+      }, {
+        pending: '아이디어를 분석하는 중…',
+        success: '분석 미리보기를 표시했습니다. 새로고침하면 저장된 상태로 돌아갑니다.',
+        preserved: '기존 화면은 그대로 유지했습니다.',
+      })
+    } finally {
+      setAnalyzing(false)
+    }
+  }, [analyzing, client, remoteTask])
 
   const reloadRemote = useCallback(async () => {
     if (!client) return
@@ -154,5 +210,5 @@ export const useIdeaBoard = () => {
     }
   }, [board, client])
 
-  return { board, syncState, syncMessage, remoteEnabled: Boolean(client), addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, reloadRemote }
+  return { board, syncState, syncMessage, remoteEnabled: Boolean(client), analyzing, addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, analyzeBoard, reloadRemote }
 }
