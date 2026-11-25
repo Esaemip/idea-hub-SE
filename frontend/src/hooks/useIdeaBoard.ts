@@ -16,6 +16,7 @@ export const useIdeaBoard = () => {
   const [syncMessage, setSyncMessage] = useState(hasRemoteConfiguration ? '서버 연결이 설정됐습니다. 필요할 때 최신 데이터를 불러오세요.' : '이 브라우저에 자동 저장됩니다.')
   const client = useMemo(() => makeClient(), [])
   const pendingIdeaCreates = useRef(new Map<string, Promise<number>>())
+  const syncBatch = useRef({ active: 0, failed: false, errorMessage: '' })
 
   useEffect(() => {
     try {
@@ -31,18 +32,34 @@ export const useIdeaBoard = () => {
 
   const remoteTask = useCallback(async (task: (api: ApiClient) => Promise<void>): Promise<boolean> => {
     if (!client) return true
+    const batch = syncBatch.current
+    if (batch.active === 0) {
+      batch.failed = false
+      batch.errorMessage = ''
+    }
+    batch.active += 1
     setSyncState('syncing')
     setSyncMessage('서버에 저장하는 중…')
+    let succeeded = true
     try {
       await task(client)
-      setSyncState('synced')
-      setSyncMessage('서버와 동기화됐습니다.')
-      return true
     } catch (error) {
-      setSyncState('error')
-      setSyncMessage(error instanceof Error ? `${error.message} 로컬 변경은 보존했습니다.` : '서버 저장에 실패했지만 로컬 변경은 보존했습니다.')
-      return false
+      succeeded = false
+      batch.failed = true
+      batch.errorMessage = error instanceof Error ? `${error.message} 로컬 변경은 보존했습니다.` : '서버 저장에 실패했지만 로컬 변경은 보존했습니다.'
+    } finally {
+      batch.active -= 1
+      if (batch.active === 0) {
+        if (batch.failed) {
+          setSyncState('error')
+          setSyncMessage(batch.errorMessage)
+        } else {
+          setSyncState('synced')
+          setSyncMessage('서버와 동기화됐습니다.')
+        }
+      }
     }
+    return succeeded
   }, [client])
 
   const addIdeas = useCallback(async (texts: string[]) => {

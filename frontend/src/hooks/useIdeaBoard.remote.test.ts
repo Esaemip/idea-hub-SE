@@ -60,4 +60,39 @@ describe('useIdeaBoard remote synchronization', () => {
     expect(result.current.syncState).toBe('error')
     expect(result.current.syncMessage).toBe('서버 삭제에 실패해 카드를 원래 위치로 복구했습니다.')
   })
+
+  it('keeps the error state when one of concurrent sync requests fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubEnv('VITE_BOARD_ID', '1')
+    vi.resetModules()
+    let failFirst!: (reason: Error) => void
+    let finishSecond!: (response: Response) => void
+    const firstResponse = new Promise<Response>((_resolve, reject) => { failFirst = reject })
+    const secondResponse = new Promise<Response>((resolve) => { finishSecond = resolve })
+    vi.spyOn(globalThis, 'fetch')
+      .mockImplementationOnce(async () => firstResponse)
+      .mockImplementationOnce(async () => secondResponse)
+    const { useIdeaBoard } = await import('./useIdeaBoard')
+    const { result } = renderHook(() => useIdeaBoard())
+
+    let firstRequest!: Promise<void>
+    let secondRequest!: Promise<void>
+    act(() => {
+      firstRequest = result.current.addIdeas(['실패할 카드'])
+      secondRequest = result.current.addIdeas(['성공할 카드'])
+    })
+    await act(async () => {
+      failFirst(new TypeError('network down'))
+      await firstRequest
+    })
+    expect(result.current.syncState).toBe('syncing')
+
+    await act(async () => {
+      finishSecond(new Response(JSON.stringify({ id: 10, text: '성공할 카드' }), { status: 201, headers: { 'Content-Type': 'application/json' } }))
+      await secondRequest
+    })
+
+    expect(result.current.syncState).toBe('error')
+    expect(result.current.syncMessage).toContain('서버에 연결할 수 없어요.')
+  })
 })

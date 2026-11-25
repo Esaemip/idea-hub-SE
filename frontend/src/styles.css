@@ -127,7 +127,8 @@ main { padding: 28px clamp(20px, 4vw, 56px) 56px; }
   .app-header { align-items: flex-start; padding: 14px 16px; }
   .brand-mark { width: 42px; height: 42px; }
   .header-actions { flex-direction: column; align-items: flex-end; }
-  .header-actions .button { display: none; }
+  .header-actions .button { min-height: 32px; padding-inline: 9px; font-size: 11px; }
+  .reload-prefix { display: none; }
   main { padding: 18px 14px 38px; }
   .composer { padding: 21px 17px; border-radius: 18px; }
   .composer-controls { flex-wrap: wrap; }

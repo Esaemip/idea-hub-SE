@@ -22,10 +22,10 @@ export function AppHeader({ title, ideaCount, groupCount, syncState, syncMessage
         <p>{ideaCount}개 아이디어 · {groupCount}개 그룹</p>
       </div>
       <div className="header-actions">
-        <div className={`sync-badge sync-${syncState}`} title={syncMessage} role="status">
+        <div className={`sync-badge sync-${syncState}`} title={syncMessage} role="status" aria-busy={syncState === 'syncing'}>
           <span className="sync-dot" aria-hidden="true" />{labels[syncState]}
         </div>
-        {remoteEnabled ? <button className="button secondary compact" type="button" onClick={onReload}>서버에서 새로고침</button> : null}
+        {remoteEnabled ? <button className="button secondary compact" type="button" disabled={syncState === 'syncing'} aria-label="서버에서 새로고침" onClick={onReload}><span className="reload-prefix">서버에서 </span>새로고침</button> : null}
       </div>
     </header>
   )
