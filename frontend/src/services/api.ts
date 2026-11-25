@@ -32,6 +32,17 @@ export class ApiError extends Error {
   }
 }
 
+const readErrorDetail = (body: unknown): string | null => {
+  if (!body || typeof body !== 'object' || !('detail' in body)) return null
+  const detail = (body as { detail?: unknown }).detail
+  if (typeof detail === 'string' && detail.trim()) return detail
+  if (Array.isArray(detail)) {
+    const messages = detail.flatMap((item) => item && typeof item === 'object' && 'msg' in item && typeof item.msg === 'string' ? [item.msg] : [])
+    if (messages.length) return messages.join(' ')
+  }
+  return null
+}
+
 const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Promise<T> => {
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
@@ -53,8 +64,8 @@ const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Pr
   if (!response.ok) {
     let message = '서버 요청을 처리하지 못했어요.'
     try {
-      const body = await response.json() as { detail?: string }
-      if (body.detail) message = body.detail
+      const detail = readErrorDetail(await response.json())
+      if (detail) message = detail
     } catch {
       // Use the fallback message when the server does not return JSON.
     }
@@ -99,6 +110,13 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
     },
     createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
     updateIdea: (id, text) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'PATCH', body: JSON.stringify({ text }) }),
-    deleteIdea: (id) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'DELETE' }),
+    async deleteIdea(id) {
+      try {
+        await request(base, `/boards/${boardId}/ideas/${id}`, { method: 'DELETE' })
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) return
+        throw error
+      }
+    },
   }
 }

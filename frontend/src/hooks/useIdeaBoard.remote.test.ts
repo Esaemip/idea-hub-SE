@@ -40,4 +40,24 @@ describe('useIdeaBoard remote synchronization', () => {
     expect(fetchMock.mock.calls.map(([, init]) => init?.method)).toEqual(['POST', 'PATCH'])
     expect(fetchMock.mock.calls[1][0]).toBe('http://localhost:8000/boards/1/ideas/9')
   })
+
+  it('restores a server card when deletion fails', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubEnv('VITE_BOARD_ID', '1')
+    vi.resetModules()
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify({
+      id: 'server-board-1', serverId: 1, title: '보드', updatedAt: '2026-11-25T00:00:00.000Z', groups: [],
+      ideas: [{ id: 'server-idea-7', serverId: 7, text: '삭제 실패 카드', groupId: null, favorite: false, assignmentIsManual: false, createdAt: '2026-11-25T00:00:00.000Z', updatedAt: '2026-11-25T00:00:00.000Z' }],
+    }))
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('network down'))
+    const { useIdeaBoard } = await import('./useIdeaBoard')
+    const { result } = renderHook(() => useIdeaBoard())
+    const idea = result.current.board.ideas[0]
+
+    await act(async () => { await result.current.deleteIdea(idea) })
+
+    expect(result.current.board.ideas).toContainEqual(idea)
+    expect(result.current.syncState).toBe('error')
+    expect(result.current.syncMessage).toBe('서버 삭제에 실패해 카드를 원래 위치로 복구했습니다.')
+  })
 })

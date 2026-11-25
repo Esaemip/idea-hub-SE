@@ -14,13 +14,15 @@ export function AddGroupForm({ onAdd }: AddGroupFormProps) {
     setSaving(true); await onAdd(name); setSaving(false); setName(''); setError(''); setOpen(false)
   }
 
+  const cancel = () => { setOpen(false); setName(''); setError('') }
+
   if (!open) return <button className="add-group-card" type="button" onClick={() => setOpen(true)}><span aria-hidden="true">＋</span>새 그룹 만들기</button>
   return (
-    <section className="add-group-form" aria-label="새 그룹 만들기">
+    <form className="add-group-form" aria-label="새 그룹 만들기" onSubmit={(event) => { event.preventDefault(); void submit() }}>
       <label htmlFor="new-group">그룹 이름</label>
-      <input id="new-group" maxLength={MAX_GROUP_NAME_LENGTH} value={name} onChange={(event) => { setName(event.target.value); setError('') }} autoFocus />
+      <input id="new-group" maxLength={MAX_GROUP_NAME_LENGTH} value={name} onChange={(event) => { setName(event.target.value); setError('') }} onKeyDown={(event) => { if (event.key === 'Escape') cancel() }} autoFocus />
       {error ? <p className="field-error" role="alert">{error}</p> : null}
-      <div className="inline-actions"><button className="button ghost compact" type="button" onClick={() => { setOpen(false); setError('') }}>취소</button><button className="button primary compact" type="button" disabled={saving} onClick={() => void submit()}>만들기</button></div>
-    </section>
+      <div className="inline-actions"><button className="button ghost compact" type="button" disabled={saving} onClick={cancel}>취소</button><button className="button primary compact" type="submit" disabled={saving}>{saving ? '만드는 중…' : '만들기'}</button></div>
+    </form>
   )
 }

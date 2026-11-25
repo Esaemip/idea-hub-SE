@@ -6,16 +6,27 @@ const STORAGE_KEY = 'idea-hub.board.v1'
 const isBoard = (value: unknown): value is Board => {
   if (!value || typeof value !== 'object') return false
   const board = value as Partial<Board>
-  if (typeof board.id !== 'string' || typeof board.title !== 'string' || !Array.isArray(board.ideas) || !Array.isArray(board.groups)) return false
+  if (typeof board.id !== 'string'
+    || typeof board.title !== 'string'
+    || typeof board.updatedAt !== 'string'
+    || (board.serverId !== undefined && typeof board.serverId !== 'number')
+    || !Array.isArray(board.ideas)
+    || !Array.isArray(board.groups)) return false
   return board.ideas.every((idea) => idea
     && typeof idea.id === 'string'
     && typeof idea.text === 'string'
     && (idea.groupId === null || typeof idea.groupId === 'string')
-    && typeof idea.favorite === 'boolean')
+    && typeof idea.favorite === 'boolean'
+    && typeof idea.assignmentIsManual === 'boolean'
+    && typeof idea.createdAt === 'string'
+    && typeof idea.updatedAt === 'string'
+    && (idea.serverId === undefined || typeof idea.serverId === 'number'))
     && board.groups.every((group) => group
       && typeof group.id === 'string'
       && typeof group.name === 'string'
-      && typeof group.color === 'string')
+      && typeof group.nameIsManual === 'boolean'
+      && typeof group.color === 'string'
+      && (group.serverId === undefined || typeof group.serverId === 'number'))
 }
 
 export const loadBoard = (): Board => {

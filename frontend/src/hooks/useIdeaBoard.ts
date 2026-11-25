@@ -29,17 +29,19 @@ export const useIdeaBoard = () => {
     }
   }, [board])
 
-  const remoteTask = useCallback(async (task: (api: ApiClient) => Promise<void>) => {
-    if (!client) return
+  const remoteTask = useCallback(async (task: (api: ApiClient) => Promise<void>): Promise<boolean> => {
+    if (!client) return true
     setSyncState('syncing')
     setSyncMessage('서버에 저장하는 중…')
     try {
       await task(client)
       setSyncState('synced')
       setSyncMessage('서버와 동기화됐습니다.')
+      return true
     } catch (error) {
       setSyncState('error')
       setSyncMessage(error instanceof Error ? `${error.message} 로컬 변경은 보존했습니다.` : '서버 저장에 실패했지만 로컬 변경은 보존했습니다.')
+      return false
     }
   }, [client])
 
@@ -79,14 +81,19 @@ export const useIdeaBoard = () => {
   }, [remoteTask])
 
   const deleteIdea = useCallback(async (idea: Idea) => {
+    const originalIndex = board.ideas.findIndex((item) => item.id === idea.id)
     dispatch({ type: 'idea/delete', id: idea.id })
-    await remoteTask(async (api) => {
+    const deleted = await remoteTask(async (api) => {
       const pendingServerId = pendingIdeaCreates.current.get(idea.id)
       const serverId = idea.serverId ?? (pendingServerId ? await pendingServerId : undefined)
       if (serverId) await api.deleteIdea(serverId)
       pendingIdeaCreates.current.delete(idea.id)
     })
-  }, [remoteTask])
+    if (!deleted && originalIndex >= 0) {
+      dispatch({ type: 'idea/restore', idea, index: originalIndex })
+      setSyncMessage('서버 삭제에 실패해 카드를 원래 위치로 복구했습니다.')
+    }
+  }, [board.ideas, remoteTask])
 
   const toggleFavorite = useCallback((id: string) => dispatch({ type: 'idea/favorite', id }), [])
 

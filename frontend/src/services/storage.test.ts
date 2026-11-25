@@ -19,4 +19,11 @@ describe('local board storage', () => {
     localStorage.setItem('idea-hub.board.v1', JSON.stringify({ id: 'bad', title: 'bad', ideas: [{ id: 'missing-fields', text: 'bad' }], groups: [] }))
     expect(loadBoard().id).toBe('local-board')
   })
+
+  it('rejects incomplete nested card data instead of crashing later', () => {
+    const board = createStarterBoard()
+    const incomplete = { ...board, ideas: board.ideas.map((idea) => ({ ...idea, updatedAt: undefined })) }
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify(incomplete))
+    expect(loadBoard().id).toBe('local-board')
+  })
 })

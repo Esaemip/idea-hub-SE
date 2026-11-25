@@ -21,4 +21,12 @@ describe('createApiClient', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 1, title: '보드', groups: null, ideas: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     await expect(createApiClient('http://localhost:8000', 1).loadBoard()).rejects.toEqual(new ApiError('서버 응답 형식이 올바르지 않아요.', 502))
   })
+  it('extracts readable FastAPI validation messages', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ detail: [{ type: 'string_too_short', loc: ['body', 'text'], msg: 'String should have at least 1 character' }] }), { status: 422, headers: { 'Content-Type': 'application/json' } }))
+    await expect(createApiClient('http://localhost:8000', 1).createIdea('')).rejects.toEqual(new ApiError('String should have at least 1 character', 422))
+  })
+  it('treats deleting an already removed card as successful', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ detail: '아이디어를 찾을 수 없습니다.' }), { status: 404, headers: { 'Content-Type': 'application/json' } }))
+    await expect(createApiClient('http://localhost:8000', 1).deleteIdea(99)).resolves.toBeUndefined()
+  })
 })

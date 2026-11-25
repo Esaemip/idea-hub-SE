@@ -149,6 +149,7 @@ export type BoardAction =
   | { type: 'ideas/add'; ideas: Idea[] }
   | { type: 'idea/update'; id: string; text: string }
   | { type: 'idea/delete'; id: string }
+  | { type: 'idea/restore'; idea: Idea; index: number }
   | { type: 'idea/favorite'; id: string }
   | { type: 'idea/move'; id: string; groupId: string | null }
   | { type: 'idea/link-server'; id: string; serverId: number }
@@ -165,6 +166,12 @@ export const boardReducer = (board: Board, action: BoardAction): Board => {
     case 'idea/update':
       return touched({ ...board, ideas: board.ideas.map((idea) => idea.id === action.id ? { ...idea, text: action.text.trim(), updatedAt: new Date().toISOString() } : idea) })
     case 'idea/delete': return touched({ ...board, ideas: board.ideas.filter((idea) => idea.id !== action.id) })
+    case 'idea/restore': {
+      if (board.ideas.some((idea) => idea.id === action.idea.id)) return board
+      const ideas = [...board.ideas]
+      ideas.splice(Math.min(Math.max(action.index, 0), ideas.length), 0, action.idea)
+      return touched({ ...board, ideas })
+    }
     case 'idea/favorite':
       return touched({ ...board, ideas: board.ideas.map((idea) => idea.id === action.id ? { ...idea, favorite: !idea.favorite } : idea) })
     case 'idea/move':

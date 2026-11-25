@@ -22,6 +22,13 @@ describe('boardReducer', () => {
     expect(updated.ideas.find((item) => item.id === idea.id)?.text).toBe('수정한 카드')
     expect(removed.ideas.find((item) => item.id === idea.id)).toBeUndefined()
   })
+  it('restores a card at its original position after a failed deletion', () => {
+    const board = createStarterBoard(); const idea = board.ideas[1]
+    const removed = boardReducer(board, { type: 'idea/delete', id: idea.id })
+    const restored = boardReducer(removed, { type: 'idea/restore', idea, index: 1 })
+    expect(restored.ideas[1]).toEqual(idea)
+    expect(restored.ideas).toHaveLength(board.ideas.length)
+  })
   it('creates, renames and manually assigns a group', () => {
     const board = createStarterBoard(); const group = createGroup('새 그룹'); const idea = board.ideas[0]
     let state = boardReducer(board, { type: 'group/add', group })
