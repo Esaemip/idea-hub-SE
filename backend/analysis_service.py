@@ -1,7 +1,4 @@
-"""P2 AI 연동 준비: 분석 함수 주입, 결과 검증 및 원자적 반영.
-
-현재 HTTP 분석 API와 연결하지 않는다. 실제 AI 함수가 준비되면 연결한다.
-"""
+"""P2 AI 분석 요청 구성, 결과 검증 및 원자적 반영."""
 from contextlib import closing
 
 from backend.database import connect
@@ -59,7 +56,7 @@ def _validate(result, board_id, groups, targets):
 def run_analysis(database_path, board_id, analyzer):
     """analyzer(request)를 호출하고 검증한 결과만 한 트랜잭션으로 저장한다.
 
-    반환값은 처리한 카드 수다. HTTP 응답과 분석 이력은 이후 연동에서 처리한다.
+    반환값은 처리한 카드 수다. 분석 이력은 후속 작업에서 처리한다.
     """
     with closing(connect(database_path)) as connection:
         connection.execute('BEGIN')

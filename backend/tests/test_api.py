@@ -2,6 +2,7 @@ from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+import os
 
 from fastapi.testclient import TestClient
 
@@ -121,67 +122,103 @@ class ApiTests(unittest.TestCase):
         self.assertIs(self.client.get(f"/boards/{first}").json()["ideas"][0]["assignment_is_manual"], False)
 
 
-    def test_mock_analysis_groups_new_cards_without_writing_to_database(self):
-        board = self.client.post("/boards", json={"title": "기획 회의"}).json()
-        board_url = f"/boards/{board['id']}"
-        for text in ("마감 알림", "제출 전에 알려주기", "메뉴 추천"):
-            self.assertEqual(
-                self.client.post(f"{board_url}/ideas", json={"text": text}).status_code,
-                201,
-            )
-        saved = self.client.get(board_url).json()
+    def test_analysis_runs_grouping_and_persists_results(self):
+        from unittest.mock import patch
+        board = self.client.post("/boards", json={"title": "기획"}).json()
+        url = f"/boards/{board['id']}"
+        existing = self.client.post(f"{url}/groups", json={"name": "내 알림"}).json()
+        manual = self.client.post(f"{url}/ideas", json={"text": "기존 알림"}).json()
+        self.client.patch(f"{url}/ideas/{manual['id']}/group", json={"group_id": existing["id"]})
+        locked = self.client.post(f"{url}/ideas", json={"text": "수동 미분류"}).json()
+        self.client.patch(f"{url}/ideas/{locked['id']}/group", json={"group_id": None})
+        cards = [self.client.post(f"{url}/ideas", json={"text": text}).json()
+                 for text in ("새 알림", "메뉴 추천", "식당 추천", "사진 편집")]
+        vectors = {"기존 알림": [1, 0, 0], "새 알림": [1, 0, 0],
+                   "메뉴 추천": [0, 1, 0], "식당 추천": [0, 1, 0], "사진 편집": [0, 0, 1]}
+        def encode(batch):
+            return [{"id": row["id"], "embedding": vectors[row["text"]]} for row in batch]
+        with patch("ai.grouping.embed_ideas", side_effect=encode) as model:
+            response = self.client.post(f"{url}/analyze", json={})
+            self.assertEqual(response.status_code, 200)
+            model.assert_called_once()
+        result = response.json()
+        self.assertEqual(result, self.client.get(url).json())
+        self.assertEqual(result["groups"][0]["name"], "내 알림")
+        self.assertTrue(result["groups"][0]["name_is_manual"])
+        items = {item["id"]: item for item in result["ideas"]}
+        self.assertEqual(items[manual["id"]]["group_id"], existing["id"])
+        self.assertIsNone(items[locked["id"]]["group_id"])
+        self.assertIsNone(items[locked["id"]]["analyzed_at"])
+        self.assertEqual(items[cards[0]["id"]]["group_id"], existing["id"])
+        new_group = items[cards[1]["id"]]["group_id"]
+        self.assertGreater(new_group, 0)
+        self.assertEqual(new_group, items[cards[2]["id"]]["group_id"])
+        self.assertIsNone(items[cards[3]["id"]]["group_id"])
+        self.assertTrue(all(items[card["id"]]["analyzed_at"] for card in cards))
+        with patch("ai.grouping.embed_ideas") as model:
+            self.assertEqual(self.client.post(f"{url}/analyze", json={}).json(), result)
+            model.assert_not_called()
+        with TestClient(create_app(self.path)) as restarted:
+            self.assertEqual(restarted.get(url).json(), result)
 
-        result = self.client.post(f"{board_url}/analyze", json={})
-        self.assertEqual(result.status_code, 200)
-        preview = result.json()
-        self.assertEqual(preview.keys(), saved.keys())
-        self.assertEqual(preview["id"], saved["id"])
-        self.assertEqual(len(preview["groups"]), 1)
-        group = preview["groups"][0]
-        self.assertLess(group["id"], 0)
-        self.assertEqual(group["board_id"], board["id"])
-        self.assertEqual([card["id"] for card in preview["ideas"]], [card["id"] for card in saved["ideas"]])
-        self.assertEqual(
-            [card["group_id"] for card in preview["ideas"]],
-            [group["id"], group["id"], None],
-        )
-        self.assertTrue(all(card["analyzed_at"] is not None for card in preview["ideas"]))
-        self.assertEqual(self.client.get(board_url).json(), saved)
-        with closing(connect(self.path)) as db:
-            self.assertEqual(db.execute("SELECT COUNT(*) FROM analysis_results").fetchone()[0], 0)
+    def test_analysis_failure_does_not_change_board(self):
+        from unittest.mock import patch
+        board_id = self.client.post("/boards", json={"title": "보드"}).json()["id"]
+        url = f"/boards/{board_id}"
+        self.client.post(f"{url}/ideas", json={"text": "카드"})
+        before = self.client.get(url).json()
+        for result in (RuntimeError("모델 실패"),
+                       {"board_id": board_id, "groups": [], "unclassified_idea_ids": []}):
+            with self.subTest(result=result), patch("backend.main.propose_idea_groups") as model:
+                if isinstance(result, Exception):
+                    model.side_effect = result
+                else:
+                    model.return_value = result
+                self.assertEqual(self.client.post(f"{url}/analyze", json={}).status_code, 503)
+                self.assertEqual(self.client.get(url).json(), before)
 
-    def test_mock_analysis_keeps_manual_and_previously_analyzed_cards(self):
-        board = self.client.post("/boards", json={"title": "기획 회의"}).json()
-        board_url = f"/boards/{board['id']}"
-        group = self.client.post(f"{board_url}/groups", json={"name": "기존 그룹"}).json()
-        cards = [
-            self.client.post(f"{board_url}/ideas", json={"text": text}).json()
-            for text in ("수동 배정", "미분류로 고정", "이전 분석", "새 카드")
-        ]
-        for card, group_id in ((cards[0], group["id"]), (cards[1], None)):
-            self.assertEqual(
-                self.client.patch(f"{board_url}/ideas/{card['id']}/group", json={"group_id": group_id}).status_code,
-                200,
-            )
-        with closing(connect(self.path)) as db, db:
-            db.execute(
-                "UPDATE ideas SET analyzed_at = created_at WHERE id = ?",
-                (cards[2]["id"],),
-            )
-        saved = self.client.get(board_url).json()
+    def test_analysis_rejects_concurrent_edits(self):
+        from unittest.mock import patch
+        board_id = self.client.post("/boards", json={"title": "보드"}).json()["id"]
+        url = f"/boards/{board_id}"
+        card = self.client.post(f"{url}/ideas", json={"text": "원래 내용"}).json()
+        def analyze(**request):
+            with closing(connect(self.path)) as db, db:
+                db.execute("UPDATE ideas SET text = ? WHERE id = ?", ("수정된 내용", card["id"]))
+            return {"board_id": board_id, "groups": [], "unclassified_idea_ids": [card["id"]]}
+        with patch("backend.main.propose_idea_groups", side_effect=analyze):
+            self.assertEqual(self.client.post(f"{url}/analyze", json={}).status_code, 409)
+        idea = self.client.get(url).json()["ideas"][0]
+        self.assertEqual(idea["text"], "수정된 내용")
+        self.assertIsNone(idea["analyzed_at"])
 
-        preview = self.client.post(f"{board_url}/analyze", json={}).json()
-        self.assertEqual(preview["groups"], saved["groups"])
-        self.assertEqual(preview["ideas"][:3], saved["ideas"][:3])
-        self.assertIsNone(preview["ideas"][3]["group_id"])
-        self.assertIsNotNone(preview["ideas"][3]["analyzed_at"])
-
-    def test_mock_analysis_empty_board_and_missing_board(self):
+    def test_analysis_empty_board_and_missing_board(self):
+        from unittest.mock import patch
         board = self.client.post("/boards", json={"title": "빈 보드"}).json()
-        board_url = f"/boards/{board['id']}"
-        current = self.client.get(board_url).json()
-        self.assertEqual(self.client.post(f"{board_url}/analyze", json={}).json(), current)
-        self.assertEqual(self.client.post("/boards/999/analyze", json={}).status_code, 404)
+        url = f"/boards/{board['id']}"
+        current = self.client.get(url).json()
+        with patch("backend.main.propose_idea_groups") as model:
+            self.assertEqual(self.client.post(f"{url}/analyze", json={}).json(), current)
+            self.assertEqual(self.client.post("/boards/999/analyze", json={}).status_code, 404)
+            model.assert_not_called()
+
+    @unittest.skipUnless(os.getenv("IDEA_HUB_REAL_MODEL") == "1", "requires model weights")
+    def test_analysis_with_real_model(self):
+        board_id = self.client.post("/boards", json={"title": "실제 모델"}).json()["id"]
+        url = f"/boards/{board_id}"
+        cards = [self.client.post(f"{url}/ideas", json={"text": text}).json()
+                 for text in ("마감 전에 알려줘", "제출 기한이 다가오면 알림을 보내줘",
+                              "식당 메뉴를 추천해 줘")]
+        response = self.client.post(f"{url}/analyze", json={})
+        self.assertEqual(response.status_code, 200, response.text)
+        result = response.json()
+        ideas = {row["id"]: row for row in result["ideas"]}
+        group_id = ideas[cards[0]["id"]]["group_id"]
+        self.assertIsNotNone(group_id)
+        self.assertEqual(ideas[cards[1]["id"]]["group_id"], group_id)
+        self.assertIsNone(ideas[cards[2]["id"]]["group_id"])
+        self.assertTrue(all(ideas[card["id"]]["analyzed_at"] for card in cards))
+        self.assertEqual(self.client.get(url).json(), result)
 
 
 if __name__ == '__main__':

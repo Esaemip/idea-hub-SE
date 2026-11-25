@@ -2,13 +2,17 @@
 
 from contextlib import asynccontextmanager, closing, contextmanager
 from pathlib import Path
+import logging
 
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, StrictInt, field_validator
 
 from backend.database import DEFAULT_DATABASE, connect, initialize_database
-from backend.mock_analysis import preview_analysis
+from backend.analysis_service import StaleAnalysis, run_analysis
+from ai.grouping import propose_idea_groups
+
+logger = logging.getLogger(__name__)
 
 
 class BoardCreate(BaseModel):
@@ -133,9 +137,18 @@ def create_app(database_path: str | Path = DEFAULT_DATABASE) -> FastAPI:
     def read_board(board_id: int):
         return load_board_detail(board_id)
 
-    @app.post("/boards/{board_id}/analyze", summary="아이디어 분석 미리보기 (Mock)")
+    @app.post("/boards/{board_id}/analyze", summary="아이디어 AI 분석")
     def analyze_board(board_id: int):
-        return preview_analysis(load_board_detail(board_id))
+        # 없는 보드를 먼저 404로 처리하고, 분석 중에는 DB 쓰기 잠금을 잡지 않는다.
+        load_board_detail(board_id)
+        try:
+            run_analysis(database_path, board_id, lambda request: propose_idea_groups(**request))
+        except StaleAnalysis as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except Exception as exc:
+            logger.exception("아이디어 분석 실패: board_id=%s", board_id)
+            raise HTTPException(status_code=503, detail="분석에 실패했습니다. 잠시 후 다시 시도해 주세요.") from exc
+        return load_board_detail(board_id)
 
     @app.delete("/boards/{board_id}", status_code=status.HTTP_204_NO_CONTENT)
     def delete_board(board_id: int):
