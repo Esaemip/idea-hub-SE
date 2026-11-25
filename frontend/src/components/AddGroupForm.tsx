@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { MAX_GROUP_NAME_LENGTH, validateGroupName } from '../domain/board'
 
-interface AddGroupFormProps { onAdd: (name: string) => Promise<void> }
+interface AddGroupFormProps { onAdd: (name: string) => Promise<boolean> }
 
 export function AddGroupForm({ onAdd }: AddGroupFormProps) {
   const [open, setOpen] = useState(false)
@@ -11,7 +11,13 @@ export function AddGroupForm({ onAdd }: AddGroupFormProps) {
   const submit = async () => {
     const message = validateGroupName(name)
     if (message) { setError(message); return }
-    setSaving(true); await onAdd(name); setSaving(false); setName(''); setError(''); setOpen(false)
+    setSaving(true)
+    try {
+      const created = await onAdd(name)
+      if (created) { setName(''); setError(''); setOpen(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
   const cancel = () => { setOpen(false); setName(''); setError('') }

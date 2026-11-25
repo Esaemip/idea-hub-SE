@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { boardReducer, createGroup, createIdea, mergeRemoteBoard } from '../domain/board'
+import { boardReducer, createGroup, createIdea, getGroupColor, mergeRemoteBoard } from '../domain/board'
 import { ApiError, createApiClient, type ApiClient } from '../services/api'
 import { loadBoard, saveBoard } from '../services/storage'
 import type { Idea, SyncState } from '../types'
@@ -167,13 +167,29 @@ export const useIdeaBoard = () => {
   }, [client, remoteTask])
 
   const addGroup = useCallback(async (name: string) => {
-    const group = createGroup(name, board.groups.length)
-    dispatch({ type: 'group/add', group })
-    if (client) {
-      setSyncState('local')
-      setSyncMessage('새 그룹은 그룹 API가 연결될 때까지 이 브라우저에 보존됩니다.')
+    if (analyzingRef.current) return false
+    if (!client) {
+      dispatch({ type: 'group/add', group: createGroup(name, boardRef.current.groups.length) })
+      return true
     }
-  }, [board.groups.length, client])
+    return remoteTask(async (api) => {
+      const remote = await api.createGroup(name.trim())
+      dispatch({
+        type: 'group/add',
+        group: {
+          id: `server-group-${remote.id}`,
+          serverId: remote.id,
+          name: remote.name,
+          nameIsManual: remote.name_is_manual,
+          color: getGroupColor(boardRef.current.groups.length),
+        },
+      })
+    }, {
+      pending: '새 그룹을 서버에 만드는 중…',
+      success: '새 그룹을 서버에 저장했습니다.',
+      preserved: '입력한 이름으로 다시 시도해 주세요.',
+    })
+  }, [client, remoteTask])
 
   const renameGroup = useCallback(async (groupId: string, name: string): Promise<boolean> => {
     if (analyzingRef.current) return false
@@ -199,11 +215,11 @@ export const useIdeaBoard = () => {
   }, [client, remoteTask])
 
   const analyzeBoard = useCallback(async () => {
-    if (!client || analyzingRef.current) return
+    if (!client || analyzingRef.current) return false
     analyzingRef.current = true
     setAnalyzing(true)
     try {
-      await remoteTask(async (api) => {
+      return await remoteTask(async (api) => {
         await Promise.all([...pendingIdeaCreates.current.values()])
         const analyzed = await api.analyzeBoard()
         dispatch({ type: 'hydrate', board: mergeRemoteBoard(analyzed, boardRef.current) })

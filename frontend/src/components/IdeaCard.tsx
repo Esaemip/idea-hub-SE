@@ -6,13 +6,14 @@ interface IdeaCardProps {
   idea: Idea
   groups: IdeaGroup[]
   interactionLocked?: boolean
+  dragEnabled?: boolean
   onUpdate: (idea: Idea, text: string) => Promise<void>
   onDelete: (idea: Idea) => Promise<void>
   onFavorite: (id: string) => void
   onMove: (idea: Idea, groupId: string | null) => Promise<void>
 }
 
-export const IdeaCard = memo(function IdeaCard({ idea, groups, interactionLocked = false, onUpdate, onDelete, onFavorite, onMove }: IdeaCardProps) {
+export const IdeaCard = memo(function IdeaCard({ idea, groups, interactionLocked = false, dragEnabled = true, onUpdate, onDelete, onFavorite, onMove }: IdeaCardProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(idea.text)
   const [error, setError] = useState('')
@@ -40,8 +41,8 @@ export const IdeaCard = memo(function IdeaCard({ idea, groups, interactionLocked
   }
 
   return (
-    <article className="idea-card" aria-busy={busy || interactionLocked} draggable={!interactionLocked && !editing && !busy} onDragStart={(event) => { if (interactionLocked) { event.preventDefault(); return }; event.dataTransfer.setData('text/plain', idea.id); event.dataTransfer.effectAllowed = 'move' }}>
-      <div className="card-topline"><span className={`drag-handle ${interactionLocked ? 'locked' : ''}`} title={interactionLocked ? '분석이 끝나면 이동할 수 있습니다.' : '다른 그룹으로 끌어서 이동'} aria-hidden="true">⠿</span><button className={`icon-button star ${idea.favorite ? 'active' : ''}`} type="button" aria-label={idea.favorite ? '즐겨찾기 해제' : '즐겨찾기에 추가'} aria-pressed={idea.favorite} disabled={busy || interactionLocked} onClick={() => onFavorite(idea.id)}>★</button></div>
+    <article className="idea-card" aria-busy={busy || interactionLocked} draggable={dragEnabled && !interactionLocked && !editing && !busy} onDragStart={(event) => { if (!dragEnabled || interactionLocked) { event.preventDefault(); return }; event.dataTransfer.setData('text/plain', idea.id); event.dataTransfer.effectAllowed = 'move' }}>
+      <div className="card-topline"><span className={`drag-handle ${interactionLocked || !dragEnabled ? 'locked' : ''}`} title={!dragEnabled ? '분류 보기에서 그룹 사이로 끌어 이동할 수 있습니다.' : interactionLocked ? '분석이 끝나면 이동할 수 있습니다.' : '다른 그룹으로 끌어서 이동'} aria-hidden="true">⠿</span><button className={`icon-button star ${idea.favorite ? 'active' : ''}`} type="button" aria-label={idea.favorite ? '즐겨찾기 해제' : '즐겨찾기에 추가'} aria-pressed={idea.favorite} disabled={busy || interactionLocked} onClick={() => onFavorite(idea.id)}>★</button></div>
       {editing ? (
         <div className="edit-panel">
           <label className="sr-only" htmlFor={`edit-${idea.id}`}>아이디어 수정</label>

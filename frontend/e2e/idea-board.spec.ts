@@ -43,6 +43,7 @@ test('bulk input, search and favorites update immediately', async ({ page }) => 
 })
 
 test('group creation and rename work on a mobile viewport', async ({ page }) => {
+  await page.getByRole('button', { name: '분류' }).click()
   await page.getByRole('button', { name: '새 그룹 만들기' }).click()
   await page.getByLabel('그룹 이름').fill('모바일 그룹')
   await page.getByRole('button', { name: '만들기' }).click()

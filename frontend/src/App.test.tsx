@@ -37,11 +37,14 @@ describe('Idea Hub card flows', () => {
     expect(opener).toHaveFocus()
   })
 
-  it('shows the empty board instead of a no-results error when there are no cards', () => {
+  it('shows the empty card board and allows switching to group management', async () => {
+    const user = userEvent.setup()
     const board = createStarterBoard()
     board.ideas = []
     saveBoard(board)
     render(<App />)
+    expect(screen.getByLabelText('빈 아이디어 보드')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '분류' }))
     expect(screen.getByLabelText('아이디어 그룹 보드')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '새 그룹 만들기' })).toBeInTheDocument()
     expect(screen.queryByText('조건에 맞는 아이디어가 없어요')).not.toBeInTheDocument()
@@ -74,6 +77,7 @@ describe('Idea Hub card flows', () => {
 
   it('creates and renames a group', async () => {
     const user = userEvent.setup(); render(<App />)
+    await user.click(screen.getByRole('button', { name: '분류' }))
     await user.click(screen.getByRole('button', { name: '새 그룹 만들기' }))
     await user.type(screen.getByLabelText('그룹 이름'), '신규 그룹')
     await user.keyboard('{Enter}')

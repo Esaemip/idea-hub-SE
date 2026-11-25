@@ -6,6 +6,8 @@ export const MAX_GROUP_NAME_LENGTH = 40
 
 const GROUP_COLORS = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
 
+export const getGroupColor = (index: number): string => GROUP_COLORS[index % GROUP_COLORS.length]
+
 export const createId = (prefix: string): string => {
   const value = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
   return `${prefix}-${value}`
@@ -28,7 +30,7 @@ export const createGroup = (name: string, index = 0): IdeaGroup => ({
   id: createId('group'),
   name: name.trim(),
   nameIsManual: true,
-  color: GROUP_COLORS[index % GROUP_COLORS.length],
+  color: getGroupColor(index),
 })
 
 export const createStarterBoard = (): Board => {

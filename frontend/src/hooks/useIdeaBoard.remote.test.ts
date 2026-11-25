@@ -169,7 +169,7 @@ describe('useIdeaBoard remote synchronization', () => {
     const { result } = renderHook(() => useIdeaBoard())
 
     let addRequest!: Promise<void>
-    let analyzeRequest!: Promise<void>
+    let analyzeRequest!: Promise<boolean>
     act(() => { addRequest = result.current.addIdeas(['방금 추가한 카드']) })
     await waitFor(() => expect(result.current.board.ideas.some((idea) => idea.text === '방금 추가한 카드')).toBe(true))
     act(() => { analyzeRequest = result.current.analyzeBoard() })
@@ -247,5 +247,38 @@ describe('useIdeaBoard remote synchronization', () => {
     expect(result.current.board.groups[0]).toMatchObject({ name: '변경 그룹', nameIsManual: true })
     expect(result.current.board.ideas[0]).toMatchObject({ groupId: 'server-group-4', assignmentIsManual: true })
     expect(persistedRenamed).toBe(true)
+  })
+
+  it('creates a group through B3 and keeps it after a reload', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubEnv('VITE_BOARD_ID', '1')
+    vi.resetModules()
+    localStorage.setItem('idea-hub.board.v1', JSON.stringify({ ...serverBoard, groups: [] }))
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+      if (url.endsWith('/groups') && init?.method === 'POST') {
+        return new Response(JSON.stringify({ id: 6, name: '새 서버 그룹', name_is_manual: true }), { status: 201, headers: { 'Content-Type': 'application/json' } })
+      }
+      if (url.endsWith('/boards/1') && (!init?.method || init.method === 'GET')) {
+        return new Response(JSON.stringify({
+          id: 1, title: '보드', updated_at: '2026-11-25T01:00:00.000Z',
+          groups: [{ id: 6, name: '새 서버 그룹', name_is_manual: true }],
+          ideas: [{ id: 7, text: '서버 카드', group_id: null, assignment_is_manual: false, created_at: '2026-11-25T00:00:00.000Z', updated_at: '2026-11-25T00:00:00.000Z' }],
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      }
+      throw new Error(`unexpected request: ${init?.method ?? 'GET'} ${url}`)
+    })
+    const { useIdeaBoard } = await import('./useIdeaBoard')
+    const { result } = renderHook(() => useIdeaBoard())
+
+    let created!: boolean
+    await act(async () => { created = await result.current.addGroup('새 서버 그룹') })
+    expect(result.current.board.groups).toContainEqual(expect.objectContaining({ serverId: 6, name: '새 서버 그룹', nameIsManual: true }))
+    await act(async () => { await result.current.reloadRemote() })
+
+    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/1/groups', expect.objectContaining({ method: 'POST', body: JSON.stringify({ name: '새 서버 그룹' }) }))
+    expect(result.current.board.groups).toHaveLength(1)
+    expect(result.current.board.groups[0]).toMatchObject({ serverId: 6, name: '새 서버 그룹' })
+    expect(created).toBe(true)
   })
 })

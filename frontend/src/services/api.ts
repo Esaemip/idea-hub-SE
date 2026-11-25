@@ -25,6 +25,12 @@ interface RemoteBoard {
 
 const palette = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
 const REQUEST_TIMEOUT_MS = 10_000
+const ANALYSIS_TIMEOUT_MS = 5 * 60_000
+
+interface RequestOptions {
+  timeoutMs?: number
+  timeoutMessage?: string
+}
 
 const isInteger = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value)
 
@@ -97,9 +103,9 @@ const readErrorDetail = (body: unknown): string | null => {
   return null
 }
 
-const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Promise<T> => {
+const request = async <T>(baseUrl: string, path: string, init?: RequestInit, options: RequestOptions = {}): Promise<T> => {
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS)
   let response: Response
   try {
     response = await fetch(`${baseUrl}${path}`, {
@@ -109,7 +115,7 @@ const request = async <T>(baseUrl: string, path: string, init?: RequestInit): Pr
     })
   } catch (error) {
     const message = error instanceof DOMException && error.name === 'AbortError'
-      ? '서버 응답 시간이 초과됐어요.'
+      ? options.timeoutMessage ?? '서버 응답 시간이 초과됐어요.'
       : '서버에 연결할 수 없어요.'
     throw new ApiError(message, 0)
   } finally {
@@ -135,6 +141,7 @@ export interface ApiClient {
   createIdea(text: string): Promise<RemoteIdea>
   updateIdea(id: number, text: string): Promise<RemoteIdea>
   deleteIdea(id: number): Promise<void>
+  createGroup(name: string): Promise<RemoteGroup>
   renameGroup(id: number, name: string): Promise<RemoteGroup>
   moveIdea(id: number, groupId: number | null): Promise<RemoteIdea>
 }
@@ -147,7 +154,10 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
       return toBoard(remote)
     },
     async analyzeBoard() {
-      const remote = await request<unknown>(base, `/boards/${boardId}/analyze`, { method: 'POST', body: JSON.stringify({}) })
+      const remote = await request<unknown>(base, `/boards/${boardId}/analyze`, { method: 'POST', body: JSON.stringify({}) }, {
+        timeoutMs: ANALYSIS_TIMEOUT_MS,
+        timeoutMessage: '분석이 예상보다 오래 걸리고 있어요. 서버에서 새로고침해 결과를 확인한 뒤 다시 시도해 주세요.',
+      })
       return toBoard(remote)
     },
     createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
@@ -160,6 +170,7 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
         throw error
       }
     },
+    createGroup: (name) => request(base, `/boards/${boardId}/groups`, { method: 'POST', body: JSON.stringify({ name }) }),
     renameGroup(id, name) {
       if (id <= 0) return Promise.reject(new ApiError('저장된 그룹 ID가 올바르지 않아요.', 400))
       return request(base, `/boards/${boardId}/groups/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) })

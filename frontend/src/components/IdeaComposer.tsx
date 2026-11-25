@@ -4,13 +4,10 @@ import { MAX_IDEA_LENGTH, validateIdea } from '../domain/board'
 interface IdeaComposerProps {
   onAdd: (text: string) => Promise<void>
   onOpenBulk: () => void
-  onAnalyze: () => Promise<void>
   analyzing: boolean
-  syncing: boolean
-  remoteEnabled: boolean
 }
 
-export function IdeaComposer({ onAdd, onOpenBulk, onAnalyze, analyzing, syncing, remoteEnabled }: IdeaComposerProps) {
+export function IdeaComposer({ onAdd, onOpenBulk, analyzing }: IdeaComposerProps) {
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -45,7 +42,6 @@ export function IdeaComposer({ onAdd, onOpenBulk, onAnalyze, analyzing, syncing,
         <textarea id="idea-input" value={text} maxLength={MAX_IDEA_LENGTH} disabled={analyzing} onChange={(event) => { setText(event.target.value); if (error) setError('') }} onKeyDown={handleKeyDown} placeholder="예: 회의가 끝나면 결정 사항을 자동으로 정리하기" aria-describedby={error ? 'idea-error' : 'idea-help'} rows={2} />
         <div className="composer-controls">
           <span id="idea-help" className="char-count">{text.length}/{MAX_IDEA_LENGTH}</span>
-          <button className="button analyze" type="button" aria-label={analyzing ? '아이디어 분석 중' : '아이디어 분석'} onClick={() => void onAnalyze()} disabled={!remoteEnabled || analyzing || saving || syncing} title={!remoteEnabled ? '서버 연결 후 사용할 수 있어요.' : syncing ? '현재 저장이 끝나면 분석할 수 있어요.' : '저장된 아이디어를 비슷한 주제로 분류합니다.'}>{analyzing ? '분류 중…' : '✦ 분류하기'}</button>
           <button className="button secondary" type="button" onClick={onOpenBulk} disabled={saving || analyzing}>여러 개 입력</button>
           <button className="button primary" type="button" onClick={() => void submit()} disabled={saving || analyzing}>{saving ? '추가 중…' : '아이디어 추가'}</button>
         </div>

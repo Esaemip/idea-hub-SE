@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { Idea, IdeaGroup } from '../types'
+import { BoardModeBar } from './BoardModeBar'
 import { GroupColumn } from './GroupColumn'
 import { IdeaComposer } from './IdeaComposer'
 
@@ -12,7 +13,10 @@ const idea: Idea = {
 
 describe('analysis interaction lock', () => {
   it('prevents new input while analysis is running', () => {
-    render(<IdeaComposer onAdd={vi.fn()} onOpenBulk={vi.fn()} onAnalyze={vi.fn()} analyzing syncing={false} remoteEnabled />)
+    render(<>
+      <BoardModeBar mode="cards" analyzing syncing={false} remoteEnabled onModeChange={vi.fn()} onAnalyze={vi.fn()} />
+      <IdeaComposer onAdd={vi.fn()} onOpenBulk={vi.fn()} analyzing />
+    </>)
 
     expect(screen.getByLabelText('새 아이디어')).toBeDisabled()
     expect(screen.getByRole('button', { name: '아이디어 분석 중' })).toBeDisabled()
