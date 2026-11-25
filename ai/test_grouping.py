@@ -60,3 +60,40 @@ class GroupingTests(unittest.TestCase):
                          [(10, [2]), (None, [3, 4])])
         self.assertEqual(result["unclassified_idea_ids"], [5])
         self.assertIs(_model(), _model())
+
+    def test_bridge_does_not_join_unrelated_endpoints(self):
+        request = dict(board_id=1, groups=[], target_idea_ids=[3, 1, 2],
+                       ideas=[idea(i, str(i)) for i in (1, 2, 3)])
+        # Adjacent pairs score 0.8, but the two endpoints score 0.28.
+        rows = [dict(id=i, embedding=v) for i, v in
+                [(1, [.8, .6]), (2, [1, 0]), (3, [.8, -.6])]]
+        with patch("ai.grouping.embed_ideas", return_value=rows):
+            result = propose_idea_groups(**request)
+            strict = propose_idea_groups(**request, new_threshold=.85)
+        self.assertEqual([g["idea_ids"] for g in result["groups"]], [[1, 2]])
+        self.assertEqual(result["unclassified_idea_ids"], [3])
+        self.assertEqual(strict["unclassified_idea_ids"], [1, 2, 3])
+
+    def test_ambiguous_existing_groups(self):
+        request = dict(board_id=1, target_idea_ids=[3],
+                       groups=[dict(group_id=i, name=str(i), name_is_manual=True)
+                               for i in (10, 20)],
+                       ideas=[idea(1, "A", 10), idea(2, "B", 20), idea(3, "C")])
+        rows = [dict(id=1, embedding=[1, 0]), dict(id=2, embedding=[.98, .199]),
+                dict(id=3, embedding=[1, 0])]
+        with patch("ai.grouping.embed_ideas", return_value=rows):
+            result = propose_idea_groups(**request)
+            relaxed = propose_idea_groups(**request, existing_margin=.01)
+        self.assertEqual(result["unclassified_idea_ids"], [3])
+        self.assertEqual(relaxed["groups"][0]["group_id"], 10)
+
+    @unittest.skipUnless(os.getenv("IDEA_HUB_REAL_MODEL") == "1", "requires model weights")
+    def test_first_analysis_with_paraphrases(self):
+        request = dict(board_id=1, groups=[], target_idea_ids=[1, 2, 3],
+                       ideas=[idea(1, "마감 전에 알려줘"),
+                              idea(2, "제출 기한이 다가오면 알림을 보내줘"),
+                              idea(3, "식당 메뉴를 추천해 줘")])
+        result = propose_idea_groups(**request)
+        self.assertEqual([(g["group_id"], g["idea_ids"]) for g in result["groups"]],
+                         [(None, [1, 2])])
+        self.assertEqual(result["unclassified_idea_ids"], [3])
