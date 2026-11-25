@@ -53,13 +53,14 @@ export default function App() {
     onMove: moveIdea,
     onDropIdea: dropIdea,
     onRename: renameGroup,
+    locked: controller.analyzing,
   }
 
   return (
     <div className="app-shell">
       <AppHeader title={board.title} ideaCount={board.ideas.length} groupCount={board.groups.length} syncState={controller.syncState} syncMessage={controller.syncMessage} remoteEnabled={controller.remoteEnabled} onReload={reloadRemote} />
       <main>
-        <IdeaComposer onAdd={addIdea} onOpenBulk={openBulk} onAnalyze={analyzeBoard} analyzing={controller.analyzing} remoteEnabled={controller.remoteEnabled} />
+        <IdeaComposer onAdd={addIdea} onOpenBulk={openBulk} onAnalyze={analyzeBoard} analyzing={controller.analyzing} syncing={controller.syncState === 'syncing'} remoteEnabled={controller.remoteEnabled} />
         <FilterBar filter={filter} groups={board.groups} resultCount={visibleIdeas.length} onChange={setFilter} />
         {visibleIdeas.length === 0 && hasActiveFilter ? (
           <section className="no-results" role="status"><span aria-hidden="true">⌕</span><h2>조건에 맞는 아이디어가 없어요</h2><p>검색어나 필터를 바꾸거나 새로운 아이디어를 추가해 보세요.</p><button className="button secondary" type="button" onClick={() => setFilter(initialFilter)}>필터 지우기</button></section>
@@ -67,10 +68,10 @@ export default function App() {
           <div className="board-grid" aria-label="아이디어 그룹 보드">
             <GroupColumn group={null} ideas={ideasByGroup.get(null) ?? []} {...columnProps} />
             {board.groups.map((group) => <GroupColumn key={group.id} group={group} ideas={ideasByGroup.get(group.id) ?? []} {...columnProps} />)}
-            {filter.groupId === 'all' ? <AddGroupForm onAdd={addGroup} /> : null}
+            {filter.groupId === 'all' && !controller.analyzing ? <AddGroupForm onAdd={addGroup} /> : null}
           </div>
         )}
-        <p className={`sync-message ${controller.syncState === 'error' ? 'error' : ''}`} role="status">{controller.syncMessage}</p>
+        <p className={`sync-message ${controller.syncState === 'error' ? 'error' : ''}`} role={controller.syncState === 'error' ? 'alert' : 'status'}>{controller.syncMessage}</p>
       </main>
       <BulkInputDialog open={bulkOpen} existing={board.ideas} onClose={closeBulk} onAdd={addIdeas} />
     </div>

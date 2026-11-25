@@ -9,19 +9,23 @@ describe('createApiClient', () => {
     await createApiClient('http://localhost:8000/', 3).createIdea('새 카드')
     expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/3/ideas', expect.objectContaining({ method: 'POST', body: JSON.stringify({ text: '새 카드' }) }))
   })
-  it('maps the analysis preview and keeps its negative group ID', async () => {
+  it('maps persisted analysis groups and keeps null cards unclassified', async () => {
     const response = {
       id: 3, title: '분석 보드', updated_at: '2026-11-25T01:00:00Z',
-      groups: [{ id: -1, name: '예시 그룹', name_is_manual: false }],
-      ideas: [{ id: 7, text: '분석 카드', group_id: -1, assignment_is_manual: false, created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' }],
+      groups: [{ id: 5, name: 'AI 그룹', name_is_manual: false }],
+      ideas: [
+        { id: 7, text: '분석 카드', group_id: 5, assignment_is_manual: false, created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' },
+        { id: 8, text: '미분류 카드', group_id: null, assignment_is_manual: false, created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' },
+      ],
     }
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(response), { status: 200, headers: { 'Content-Type': 'application/json' } }))
 
     const board = await createApiClient('http://localhost:8000', 3).analyzeBoard()
 
-    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/3/analyze', expect.objectContaining({ method: 'POST' }))
-    expect(board.groups[0]).toMatchObject({ id: 'server-group--1', serverId: -1 })
-    expect(board.ideas[0].groupId).toBe('server-group--1')
+    expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/boards/3/analyze', expect.objectContaining({ method: 'POST', body: '{}' }))
+    expect(board.groups[0]).toMatchObject({ id: 'server-group-5', serverId: 5 })
+    expect(board.ideas[0].groupId).toBe('server-group-5')
+    expect(board.ideas[1].groupId).toBeNull()
   })
   it('uses the B3 group rename and card move contracts', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch')
@@ -35,12 +39,12 @@ describe('createApiClient', () => {
     expect(fetchMock.mock.calls[0]).toEqual(['http://localhost:8000/boards/3/groups/4', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ name: '변경' }) })])
     expect(fetchMock.mock.calls[1]).toEqual(['http://localhost:8000/boards/3/ideas/7/group', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ group_id: 4 }) })])
   })
-  it('rejects preview group mutations before making a request', async () => {
+  it('rejects invalid non-positive group IDs before making a request', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch')
     const api = createApiClient('http://localhost:8000', 3)
 
-    await expect(api.renameGroup(-1, '변경 금지')).rejects.toEqual(new ApiError('분석 미리보기 그룹은 수정할 수 없어요.', 400))
-    await expect(api.moveIdea(7, -1)).rejects.toEqual(new ApiError('분석 미리보기 그룹으로 카드를 이동할 수 없어요.', 400))
+    await expect(api.renameGroup(-1, '변경 금지')).rejects.toEqual(new ApiError('저장된 그룹 ID가 올바르지 않아요.', 400))
+    await expect(api.moveIdea(7, -1)).rejects.toEqual(new ApiError('이동할 그룹 ID가 올바르지 않아요.', 400))
     expect(fetchMock).not.toHaveBeenCalled()
   })
   it('surfaces the server detail message', async () => {
@@ -54,6 +58,14 @@ describe('createApiClient', () => {
   it('rejects malformed board responses', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ id: 1, title: '보드', groups: null, ideas: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     await expect(createApiClient('http://localhost:8000', 1).loadBoard()).rejects.toEqual(new ApiError('서버 응답 형식이 올바르지 않아요.', 502))
+  })
+  it('rejects malformed nested analysis data', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+      id: 1, title: '보드', updated_at: '2026-11-25T00:00:00Z', groups: [{ id: 5, name: 'AI 그룹', name_is_manual: false }],
+      ideas: [{ id: 7, text: '카드', group_id: 5, assignment_is_manual: 'false', created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T00:00:00Z' }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+
+    await expect(createApiClient('http://localhost:8000', 1).analyzeBoard()).rejects.toEqual(new ApiError('서버 응답 형식이 올바르지 않아요.', 502))
   })
   it('extracts readable FastAPI validation messages', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ detail: [{ type: 'string_too_short', loc: ['body', 'text'], msg: 'String should have at least 1 character' }] }), { status: 422, headers: { 'Content-Type': 'application/json' } }))

@@ -4,9 +4,6 @@ export const MAX_BULK_IDEAS = 50
 export const MAX_IDEA_LENGTH = 500
 export const MAX_GROUP_NAME_LENGTH = 40
 
-export const isAnalysisPreviewGroup = (group: IdeaGroup | undefined | null): boolean =>
-  group?.serverId !== undefined && group.serverId < 0
-
 const GROUP_COLORS = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
 
 export const createId = (prefix: string): string => {

@@ -21,6 +21,13 @@ export function AppHeader({ title, ideaCount, groupCount, syncState, syncMessage
         <h1>{title}</h1>
         <p>{ideaCount}개 아이디어 · {groupCount}개 그룹</p>
       </div>
+      <div className="sidebar-menu" aria-label="보드 메뉴">
+        <span>＋ 새로운 메모 보드 만들기</span>
+        <span>⌕ 검색</span>
+        <span>▱ 프로젝트</span>
+        <small>최근 항목</small>
+        <strong aria-current="page">아이디어 허브</strong>
+      </div>
       <div className="header-actions">
         <div className={`sync-badge sync-${syncState}`} title={syncMessage} role="status" aria-busy={syncState === 'syncing'}>
           <span className="sync-dot" aria-hidden="true" />{labels[syncState]}

@@ -26,8 +26,39 @@ interface RemoteBoard {
 const palette = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
 const REQUEST_TIMEOUT_MS = 10_000
 
-const toBoard = (remote: RemoteBoard): Board => {
-  if (!Array.isArray(remote.groups) || !Array.isArray(remote.ideas)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
+const isInteger = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value)
+
+const isRemoteGroup = (value: unknown): value is RemoteGroup => {
+  if (!value || typeof value !== 'object') return false
+  const group = value as Partial<RemoteGroup>
+  return isInteger(group.id) && typeof group.name === 'string' && typeof group.name_is_manual === 'boolean'
+}
+
+const isRemoteIdea = (value: unknown): value is RemoteIdea => {
+  if (!value || typeof value !== 'object') return false
+  const idea = value as Partial<RemoteIdea>
+  return isInteger(idea.id)
+    && typeof idea.text === 'string'
+    && (idea.group_id === null || isInteger(idea.group_id))
+    && typeof idea.assignment_is_manual === 'boolean'
+    && typeof idea.created_at === 'string'
+    && typeof idea.updated_at === 'string'
+}
+
+const isRemoteBoard = (value: unknown): value is RemoteBoard => {
+  if (!value || typeof value !== 'object') return false
+  const board = value as Partial<RemoteBoard>
+  return isInteger(board.id)
+    && typeof board.title === 'string'
+    && typeof board.updated_at === 'string'
+    && Array.isArray(board.groups)
+    && board.groups.every(isRemoteGroup)
+    && Array.isArray(board.ideas)
+    && board.ideas.every(isRemoteIdea)
+}
+
+const toBoard = (remote: unknown): Board => {
+  if (!isRemoteBoard(remote)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
   const groups: IdeaGroup[] = remote.groups.map((group, index) => ({
     id: `server-group-${group.id}`,
     serverId: group.id,
@@ -112,11 +143,11 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
   const base = baseUrl.replace(/\/$/, '')
   return {
     async loadBoard() {
-      const remote = await request<RemoteBoard>(base, `/boards/${boardId}`)
+      const remote = await request<unknown>(base, `/boards/${boardId}`)
       return toBoard(remote)
     },
     async analyzeBoard() {
-      const remote = await request<RemoteBoard>(base, `/boards/${boardId}/analyze`, { method: 'POST' })
+      const remote = await request<unknown>(base, `/boards/${boardId}/analyze`, { method: 'POST', body: JSON.stringify({}) })
       return toBoard(remote)
     },
     createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
@@ -130,11 +161,11 @@ export const createApiClient = (baseUrl: string, boardId: number): ApiClient => 
       }
     },
     renameGroup(id, name) {
-      if (id <= 0) return Promise.reject(new ApiError('분석 미리보기 그룹은 수정할 수 없어요.', 400))
+      if (id <= 0) return Promise.reject(new ApiError('저장된 그룹 ID가 올바르지 않아요.', 400))
       return request(base, `/boards/${boardId}/groups/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) })
     },
     moveIdea(id, groupId) {
-      if (groupId !== null && groupId <= 0) return Promise.reject(new ApiError('분석 미리보기 그룹으로 카드를 이동할 수 없어요.', 400))
+      if (groupId !== null && groupId <= 0) return Promise.reject(new ApiError('이동할 그룹 ID가 올바르지 않아요.', 400))
       return request(base, `/boards/${boardId}/ideas/${id}/group`, { method: 'PATCH', body: JSON.stringify({ group_id: groupId }) })
     },
   }

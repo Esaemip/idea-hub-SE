@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { boardReducer, createGroup, createIdea, isAnalysisPreviewGroup, mergeRemoteBoard } from '../domain/board'
-import { createApiClient, type ApiClient } from '../services/api'
+import { boardReducer, createGroup, createIdea, mergeRemoteBoard } from '../domain/board'
+import { ApiError, createApiClient, type ApiClient } from '../services/api'
 import { loadBoard, saveBoard } from '../services/storage'
 import type { Idea, SyncState } from '../types'
 
@@ -9,6 +9,19 @@ const configuredBoardId = Number(import.meta.env.VITE_BOARD_ID)
 const hasRemoteConfiguration = Boolean(apiBaseUrl && Number.isInteger(configuredBoardId) && configuredBoardId > 0)
 
 const makeClient = (): ApiClient | null => hasRemoteConfiguration ? createApiClient(apiBaseUrl as string, configuredBoardId) : null
+
+interface RemoteTaskMessages {
+  pending: string
+  success: string
+  preserved: string
+  formatError?: (error: unknown) => string
+}
+
+const defaultRemoteTaskMessages: RemoteTaskMessages = {
+  pending: '서버에 저장하는 중…',
+  success: '서버와 동기화됐습니다.',
+  preserved: '로컬 변경은 보존했습니다.',
+}
 
 export const useIdeaBoard = () => {
   const [board, dispatch] = useReducer(boardReducer, undefined, loadBoard)
@@ -19,8 +32,15 @@ export const useIdeaBoard = () => {
   const pendingIdeaCreates = useRef(new Map<string, Promise<number>>())
   const syncBatch = useRef({ active: 0, failed: false, errorMessage: '' })
   const boardRef = useRef(board)
+  const analyzingRef = useRef(false)
 
   useEffect(() => { boardRef.current = board }, [board])
+
+  useEffect(() => {
+    for (const idea of board.ideas) {
+      if (idea.serverId !== undefined) pendingIdeaCreates.current.delete(idea.id)
+    }
+  }, [board.ideas])
 
   useEffect(() => {
     try {
@@ -36,7 +56,7 @@ export const useIdeaBoard = () => {
 
   const remoteTask = useCallback(async (
     task: (api: ApiClient) => Promise<void>,
-    messages = { pending: '서버에 저장하는 중…', success: '서버와 동기화됐습니다.', preserved: '로컬 변경은 보존했습니다.' },
+    messages: RemoteTaskMessages = defaultRemoteTaskMessages,
   ): Promise<boolean> => {
     if (!client) return true
     const batch = syncBatch.current
@@ -53,7 +73,8 @@ export const useIdeaBoard = () => {
     } catch (error) {
       succeeded = false
       batch.failed = true
-      batch.errorMessage = error instanceof Error ? `${error.message} ${messages.preserved}` : `서버 요청에 실패했지만 ${messages.preserved}`
+      batch.errorMessage = messages.formatError?.(error)
+        ?? (error instanceof Error ? `${error.message} ${messages.preserved}` : `서버 요청에 실패했지만 ${messages.preserved}`)
     } finally {
       batch.active -= 1
       if (batch.active === 0) {
@@ -70,6 +91,7 @@ export const useIdeaBoard = () => {
   }, [client])
 
   const addIdeas = useCallback(async (texts: string[]) => {
+    if (analyzingRef.current) return
     const ideas = texts.map((text) => createIdea(text))
     dispatch({ type: 'ideas/add', ideas })
     await remoteTask(async (api) => {
@@ -91,6 +113,7 @@ export const useIdeaBoard = () => {
   }, [remoteTask])
 
   const updateIdea = useCallback(async (idea: Idea, text: string) => {
+    if (analyzingRef.current) return
     dispatch({ type: 'idea/update', id: idea.id, text })
     await remoteTask(async (api) => {
       const pendingServerId = pendingIdeaCreates.current.get(idea.id)
@@ -105,7 +128,8 @@ export const useIdeaBoard = () => {
   }, [remoteTask])
 
   const deleteIdea = useCallback(async (idea: Idea) => {
-    const originalIndex = board.ideas.findIndex((item) => item.id === idea.id)
+    if (analyzingRef.current) return
+    const originalIndex = boardRef.current.ideas.findIndex((item) => item.id === idea.id)
     dispatch({ type: 'idea/delete', id: idea.id })
     const deleted = await remoteTask(async (api) => {
       const pendingServerId = pendingIdeaCreates.current.get(idea.id)
@@ -117,19 +141,14 @@ export const useIdeaBoard = () => {
       dispatch({ type: 'idea/restore', idea, index: originalIndex })
       setSyncMessage('서버 삭제에 실패해 카드를 원래 위치로 복구했습니다.')
     }
-  }, [board.ideas, remoteTask])
+  }, [remoteTask])
 
   const toggleFavorite = useCallback((id: string) => dispatch({ type: 'idea/favorite', id }), [])
 
   const moveIdea = useCallback(async (idea: Idea, groupId: string | null) => {
+    if (analyzingRef.current) return
     const currentBoard = boardRef.current
-    const sourceGroup = currentBoard.groups.find((group) => group.id === idea.groupId)
     const targetGroup = currentBoard.groups.find((group) => group.id === groupId)
-    if (isAnalysisPreviewGroup(sourceGroup) || isAnalysisPreviewGroup(targetGroup)) {
-      setSyncState('local')
-      setSyncMessage('분석 미리보기 그룹의 카드는 이동할 수 없어요. 서버에서 새로고침하면 미리보기가 사라집니다.')
-      return
-    }
     if (!client || (groupId !== null && targetGroup?.serverId === undefined)) {
       dispatch({ type: 'idea/move', id: idea.id, groupId })
       if (client) {
@@ -156,12 +175,13 @@ export const useIdeaBoard = () => {
     }
   }, [board.groups.length, client])
 
-  const renameGroup = useCallback(async (groupId: string, name: string) => {
+  const renameGroup = useCallback(async (groupId: string, name: string): Promise<boolean> => {
+    if (analyzingRef.current) return false
     const group = boardRef.current.groups.find((item) => item.id === groupId)
-    if (!group || isAnalysisPreviewGroup(group)) {
-      setSyncState('local')
-      setSyncMessage('분석 미리보기 그룹의 이름은 변경할 수 없어요.')
-      return
+    if (!group) {
+      setSyncState('error')
+      setSyncMessage('수정할 그룹을 찾을 수 없어요.')
+      return false
     }
     if (!client || group.serverId === undefined) {
       dispatch({ type: 'group/rename', id: groupId, name })
@@ -169,46 +189,51 @@ export const useIdeaBoard = () => {
         setSyncState('local')
         setSyncMessage('로컬 그룹 이름은 이 브라우저에 보존됩니다.')
       }
-      return
+      return true
     }
     const serverId = group.serverId
-    await remoteTask(async (api) => {
+    return remoteTask(async (api) => {
       await api.renameGroup(serverId, name.trim())
       dispatch({ type: 'group/rename', id: groupId, name })
     })
   }, [client, remoteTask])
 
   const analyzeBoard = useCallback(async () => {
-    if (!client || analyzing) return
+    if (!client || analyzingRef.current) return
+    analyzingRef.current = true
     setAnalyzing(true)
     try {
       await remoteTask(async (api) => {
+        await Promise.all([...pendingIdeaCreates.current.values()])
         const analyzed = await api.analyzeBoard()
         dispatch({ type: 'hydrate', board: mergeRemoteBoard(analyzed, boardRef.current) })
       }, {
         pending: '아이디어를 분석하는 중…',
-        success: '분석 미리보기를 표시했습니다. 새로고침하면 저장된 상태로 돌아갑니다.',
+        success: '분석 결과를 저장하고 화면에 반영했습니다.',
         preserved: '기존 화면은 그대로 유지했습니다.',
+        formatError: (error) => error instanceof ApiError && error.status === 409
+          ? '분석 중 보드가 변경됐어요. 서버에서 새로고침한 뒤 다시 분석해 주세요. 기존 화면은 그대로 유지했습니다.'
+          : error instanceof Error
+            ? `${error.message} 기존 화면은 그대로 유지했습니다.`
+            : '분석에 실패했습니다. 기존 화면은 그대로 유지했습니다.',
       })
     } finally {
+      analyzingRef.current = false
       setAnalyzing(false)
     }
-  }, [analyzing, client, remoteTask])
+  }, [client, remoteTask])
 
   const reloadRemote = useCallback(async () => {
     if (!client) return
-    setSyncState('syncing')
-    setSyncMessage('서버 데이터를 불러오는 중…')
-    try {
-      const remote = await client.loadBoard()
-      dispatch({ type: 'hydrate', board: mergeRemoteBoard(remote, board) })
-      setSyncState('synced')
-      setSyncMessage('서버의 최신 보드를 불러왔습니다.')
-    } catch (error) {
-      setSyncState('error')
-      setSyncMessage(error instanceof Error ? error.message : '서버 데이터를 불러오지 못했습니다.')
-    }
-  }, [board, client])
+    await remoteTask(async (api) => {
+      const remote = await api.loadBoard()
+      dispatch({ type: 'hydrate', board: mergeRemoteBoard(remote, boardRef.current) })
+    }, {
+      pending: '서버 데이터를 불러오는 중…',
+      success: '서버의 최신 보드를 불러왔습니다.',
+      preserved: '기존 화면은 그대로 유지했습니다.',
+    })
+  }, [client, remoteTask])
 
   return { board, syncState, syncMessage, remoteEnabled: Boolean(client), analyzing, addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, analyzeBoard, reloadRemote }
 }
