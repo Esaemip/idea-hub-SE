@@ -219,6 +219,10 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(ideas[cards[2]["id"]]["group_id"])
         self.assertTrue(all(ideas[card["id"]]["analyzed_at"] for card in cards))
         self.assertEqual(self.client.get(url).json(), result)
+        with closing(connect(self.path)) as db:
+            history = db.execute('SELECT status, target_count, completed_at FROM analysis_results WHERE board_id = ?', (board_id,)).fetchone()
+            self.assertEqual((history['status'], history['target_count']), ('completed', 3))
+            self.assertIsNotNone(history['completed_at'])
 
 
 if __name__ == '__main__':
