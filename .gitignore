@@ -9,6 +9,9 @@ __pycache__/
 node_modules/
 dist/
 build/
+test-results/
+playwright-report/
+coverage/
 *.db
 *.sqlite
 *.sqlite3

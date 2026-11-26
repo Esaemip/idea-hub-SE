@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -57,6 +58,18 @@ class ApiTests(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['access-control-allow-origin'], 'http://localhost:5173')
+
+    def test_concurrent_card_creation_does_not_lock_database(self):
+        board_id = self.client.post('/boards', json={'title': '동시 입력'}).json()['id']
+
+        def create_card(index):
+            return self.client.post(f'/boards/{board_id}/ideas', json={'text': f'카드 {index}'})
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            responses = list(executor.map(create_card, range(20)))
+
+        self.assertTrue(all(response.status_code == 201 for response in responses))
+        self.assertEqual(len(self.client.get(f'/boards/{board_id}').json()['ideas']), 20)
 
     def test_group_rename_and_manual_card_assignment_survive_restart(self):
         board = self.client.post("/boards", json={"title": "회의"}).json()

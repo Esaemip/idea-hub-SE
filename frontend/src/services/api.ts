@@ -1,0 +1,183 @@
+import type { Board, Idea, IdeaGroup } from '../types'
+
+export interface RemoteIdea {
+  id: number
+  text: string
+  group_id: number | null
+  assignment_is_manual: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface RemoteGroup {
+  id: number
+  name: string
+  name_is_manual: boolean
+}
+
+interface RemoteBoard {
+  id: number
+  title: string
+  updated_at: string
+  groups: RemoteGroup[]
+  ideas: RemoteIdea[]
+}
+
+const palette = ['#2f6feb', '#8b3fd9', '#0e9468', '#e8620f', '#d6336c', '#7a5c00']
+const REQUEST_TIMEOUT_MS = 10_000
+const ANALYSIS_TIMEOUT_MS = 5 * 60_000
+
+interface RequestOptions {
+  timeoutMs?: number
+  timeoutMessage?: string
+}
+
+const isInteger = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value)
+
+const isRemoteGroup = (value: unknown): value is RemoteGroup => {
+  if (!value || typeof value !== 'object') return false
+  const group = value as Partial<RemoteGroup>
+  return isInteger(group.id) && typeof group.name === 'string' && typeof group.name_is_manual === 'boolean'
+}
+
+const isRemoteIdea = (value: unknown): value is RemoteIdea => {
+  if (!value || typeof value !== 'object') return false
+  const idea = value as Partial<RemoteIdea>
+  return isInteger(idea.id)
+    && typeof idea.text === 'string'
+    && (idea.group_id === null || isInteger(idea.group_id))
+    && typeof idea.assignment_is_manual === 'boolean'
+    && typeof idea.created_at === 'string'
+    && typeof idea.updated_at === 'string'
+}
+
+const isRemoteBoard = (value: unknown): value is RemoteBoard => {
+  if (!value || typeof value !== 'object') return false
+  const board = value as Partial<RemoteBoard>
+  return isInteger(board.id)
+    && typeof board.title === 'string'
+    && typeof board.updated_at === 'string'
+    && Array.isArray(board.groups)
+    && board.groups.every(isRemoteGroup)
+    && Array.isArray(board.ideas)
+    && board.ideas.every(isRemoteIdea)
+}
+
+const toBoard = (remote: unknown): Board => {
+  if (!isRemoteBoard(remote)) throw new ApiError('서버 응답 형식이 올바르지 않아요.', 502)
+  const groups: IdeaGroup[] = remote.groups.map((group, index) => ({
+    id: `server-group-${group.id}`,
+    serverId: group.id,
+    name: group.name,
+    nameIsManual: group.name_is_manual,
+    color: palette[index % palette.length],
+  }))
+  const groupIds = new Map(groups.map((group) => [group.serverId, group.id]))
+  const ideas: Idea[] = remote.ideas.map((idea) => ({
+    id: `server-idea-${idea.id}`,
+    serverId: idea.id,
+    text: idea.text,
+    groupId: idea.group_id === null ? null : groupIds.get(idea.group_id) ?? null,
+    favorite: false,
+    assignmentIsManual: idea.assignment_is_manual,
+    createdAt: idea.created_at,
+    updatedAt: idea.updated_at,
+  }))
+  return { id: `server-board-${remote.id}`, serverId: remote.id, title: remote.title, groups, ideas, updatedAt: remote.updated_at }
+}
+
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message)
+  }
+}
+
+const readErrorDetail = (body: unknown): string | null => {
+  if (!body || typeof body !== 'object' || !('detail' in body)) return null
+  const detail = (body as { detail?: unknown }).detail
+  if (typeof detail === 'string' && detail.trim()) return detail
+  if (Array.isArray(detail)) {
+    const messages = detail.flatMap((item) => item && typeof item === 'object' && 'msg' in item && typeof item.msg === 'string' ? [item.msg] : [])
+    if (messages.length) return messages.join(' ')
+  }
+  return null
+}
+
+const request = async <T>(baseUrl: string, path: string, init?: RequestInit, options: RequestOptions = {}): Promise<T> => {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? REQUEST_TIMEOUT_MS)
+  let response: Response
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      signal: init?.signal ?? controller.signal,
+      headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
+    })
+  } catch (error) {
+    const message = error instanceof DOMException && error.name === 'AbortError'
+      ? options.timeoutMessage ?? '서버 응답 시간이 초과됐어요.'
+      : '서버에 연결할 수 없어요.'
+    throw new ApiError(message, 0)
+  } finally {
+    window.clearTimeout(timeout)
+  }
+  if (!response.ok) {
+    let message = '서버 요청을 처리하지 못했어요.'
+    try {
+      const detail = readErrorDetail(await response.json())
+      if (detail) message = detail
+    } catch {
+      // Use the fallback message when the server does not return JSON.
+    }
+    throw new ApiError(message, response.status)
+  }
+  if (response.status === 204) return undefined as T
+  return response.json() as Promise<T>
+}
+
+export interface ApiClient {
+  loadBoard(): Promise<Board>
+  analyzeBoard(): Promise<Board>
+  createIdea(text: string): Promise<RemoteIdea>
+  updateIdea(id: number, text: string): Promise<RemoteIdea>
+  deleteIdea(id: number): Promise<void>
+  createGroup(name: string): Promise<RemoteGroup>
+  renameGroup(id: number, name: string): Promise<RemoteGroup>
+  moveIdea(id: number, groupId: number | null): Promise<RemoteIdea>
+}
+
+export const createApiClient = (baseUrl: string, boardId: number): ApiClient => {
+  const base = baseUrl.replace(/\/$/, '')
+  return {
+    async loadBoard() {
+      const remote = await request<unknown>(base, `/boards/${boardId}`)
+      return toBoard(remote)
+    },
+    async analyzeBoard() {
+      const remote = await request<unknown>(base, `/boards/${boardId}/analyze`, { method: 'POST', body: JSON.stringify({}) }, {
+        timeoutMs: ANALYSIS_TIMEOUT_MS,
+        timeoutMessage: '분석이 예상보다 오래 걸리고 있어요. 서버에서 새로고침해 결과를 확인한 뒤 다시 시도해 주세요.',
+      })
+      return toBoard(remote)
+    },
+    createIdea: (text) => request(base, `/boards/${boardId}/ideas`, { method: 'POST', body: JSON.stringify({ text }) }),
+    updateIdea: (id, text) => request(base, `/boards/${boardId}/ideas/${id}`, { method: 'PATCH', body: JSON.stringify({ text }) }),
+    async deleteIdea(id) {
+      try {
+        await request(base, `/boards/${boardId}/ideas/${id}`, { method: 'DELETE' })
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) return
+        throw error
+      }
+    },
+    createGroup: (name) => request(base, `/boards/${boardId}/groups`, { method: 'POST', body: JSON.stringify({ name }) }),
+    renameGroup(id, name) {
+      if (id <= 0) return Promise.reject(new ApiError('저장된 그룹 ID가 올바르지 않아요.', 400))
+      return request(base, `/boards/${boardId}/groups/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) })
+    },
+    moveIdea(id, groupId) {
+      if (groupId !== null && groupId <= 0) return Promise.reject(new ApiError('이동할 그룹 ID가 올바르지 않아요.', 400))
+      return request(base, `/boards/${boardId}/ideas/${id}/group`, { method: 'PATCH', body: JSON.stringify({ group_id: groupId }) })
+    },
+  }
+}
