@@ -18,6 +18,7 @@ interface GroupColumnProps {
 
 export function GroupColumn({ group, ideas, groups, locked = false, onUpdate, onDelete, onFavorite, onMove, onDropIdea, onRename }: GroupColumnProps) {
   const [dragOver, setDragOver] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [name, setName] = useState(group?.name ?? '')
   const [error, setError] = useState('')
@@ -43,6 +44,7 @@ export function GroupColumn({ group, ideas, groups, locked = false, onUpdate, on
   return (
     <section className={`group-column ${dragOver ? 'drag-over' : ''}`} aria-labelledby={`group-${group?.id ?? 'unclassified'}`} aria-busy={locked} onDragOver={(event) => { if (locked) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOver(true) }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragOver(false) }} onDrop={drop} style={{ '--group-color': group?.color ?? '#8a8d97' } as CSSProperties}>
       <header className="group-header">
+        <button className="group-collapse" type="button" aria-expanded={!collapsed} aria-label={`${group?.name ?? '미분류'} ${collapsed ? '펼치기' : '접기'}`} onClick={() => setCollapsed((value) => !value)}><span aria-hidden="true">›</span></button>
         <span className="group-color" aria-hidden="true" />
         {renaming && group ? (
           <form className="rename-form" onSubmit={(event) => { event.preventDefault(); if (!locked) void saveName() }}><label className="sr-only" htmlFor={`group-name-${group.id}`}>그룹 이름</label><input id={`group-name-${group.id}`} maxLength={MAX_GROUP_NAME_LENGTH} value={name} disabled={locked} onChange={(event) => setName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') cancelRename() }} autoFocus /><button className="icon-button" type="submit" disabled={locked} aria-label="그룹 이름 저장">✓</button><button className="icon-button" type="button" aria-label="그룹 이름 수정 취소" onClick={cancelRename}>×</button></form>
@@ -50,7 +52,7 @@ export function GroupColumn({ group, ideas, groups, locked = false, onUpdate, on
         {group && !renaming ? <button className="icon-button" type="button" disabled={locked} aria-label={`${group.name} 이름 수정`} onClick={() => { setName(group.name); setRenaming(true) }}>✎</button> : null}
       </header>
       {error ? <p className="field-error group-error" role="alert">{error}</p> : null}
-      <div className="card-list">{ideas.length ? ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} groups={groups} interactionLocked={locked} onUpdate={onUpdate} onDelete={onDelete} onFavorite={onFavorite} onMove={onMove} />) : <p className="empty-group">카드를 이곳으로 끌어오세요.</p>}</div>
+      <div className="card-list" hidden={collapsed}>{ideas.length ? ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} groups={groups} interactionLocked={locked} onUpdate={onUpdate} onDelete={onDelete} onFavorite={onFavorite} onMove={onMove} />) : <p className="empty-group">카드를 이곳으로 끌어오세요.</p>}</div>
     </section>
   )
 }

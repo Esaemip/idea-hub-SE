@@ -88,4 +88,17 @@ describe('Idea Hub card flows', () => {
     await user.keyboard('{Enter}')
     expect(screen.getByRole('heading', { name: '변경한 그룹' })).toBeInTheDocument()
   })
+
+  it('collapses and expands a classified group row', async () => {
+    const user = userEvent.setup(); render(<App />)
+    await user.click(screen.getByRole('button', { name: /^분류$/ }))
+    const section = screen.getByRole('heading', { name: '화면 UI' }).closest('section')
+    expect(section).not.toBeNull()
+    const card = within(section!).getByRole('button', { name: '메인 화면은 심플하게 수정' })
+    expect(card).toBeVisible()
+    await user.click(within(section!).getByRole('button', { name: '화면 UI 접기' }))
+    expect(card).not.toBeVisible()
+    await user.click(within(section!).getByRole('button', { name: '화면 UI 펼치기' }))
+    expect(card).toBeVisible()
+  })
 })

@@ -15,18 +15,11 @@ const labels: Record<SyncState, string> = { local: '로컬 저장', syncing: '�
 export function AppHeader({ title, ideaCount, groupCount, syncState, syncMessage, remoteEnabled, onReload }: AppHeaderProps) {
   return (
     <header className="app-header">
-      <div className="brand-mark" aria-hidden="true">IH</div>
+      <div className="brand-row"><div className="brand-mark" aria-hidden="true">IH</div><strong>Idea hub</strong></div>
       <div className="title-block">
-        <span className="eyebrow">IDEA HUB</span>
-        <h1>{title}</h1>
+        <span className="eyebrow">현재 보드</span>
+        <h1 aria-current="page">{title}</h1>
         <p>{ideaCount}개 아이디어 · {groupCount}개 그룹</p>
-      </div>
-      <div className="sidebar-menu" aria-label="보드 메뉴">
-        <span>＋ 새로운 메모 보드 만들기</span>
-        <span>⌕ 검색</span>
-        <span>▱ 프로젝트</span>
-        <small>최근 항목</small>
-        <strong aria-current="page">아이디어 허브</strong>
       </div>
       <div className="header-actions">
         <div className={`sync-badge sync-${syncState}`} title={syncMessage} role="status" aria-busy={syncState === 'syncing'}>

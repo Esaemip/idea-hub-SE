@@ -3,11 +3,10 @@ import { MAX_IDEA_LENGTH, validateIdea } from '../domain/board'
 
 interface IdeaComposerProps {
   onAdd: (text: string) => Promise<void>
-  onOpenBulk: () => void
   analyzing: boolean
 }
 
-export function IdeaComposer({ onAdd, onOpenBulk, analyzing }: IdeaComposerProps) {
+export function IdeaComposer({ onAdd, analyzing }: IdeaComposerProps) {
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -31,19 +30,14 @@ export function IdeaComposer({ onAdd, onOpenBulk, analyzing }: IdeaComposerProps
   }
 
   return (
-    <section className="composer" aria-labelledby="composer-title">
-      <div>
-        <span className="section-kicker">카드</span>
-        <h2 id="composer-title">새 메모 붙이기</h2>
-        <p>Enter로 메모지를 붙이고 Shift + Enter로 다음 줄을 입력하세요.</p>
-      </div>
+    <section className={`composer canvas-composer ${text ? 'has-text' : ''}`} aria-label="새 메모 작성">
       <div className="composer-form">
         <label className="sr-only" htmlFor="idea-input">새 아이디어</label>
-        <textarea id="idea-input" value={text} maxLength={MAX_IDEA_LENGTH} disabled={analyzing} onChange={(event) => { setText(event.target.value); if (error) setError('') }} onKeyDown={handleKeyDown} placeholder="예: 회의가 끝나면 결정 사항을 자동으로 정리하기" aria-describedby={error ? 'idea-error' : 'idea-help'} rows={2} />
+        <textarea id="idea-input" value={text} maxLength={MAX_IDEA_LENGTH} disabled={analyzing} onChange={(event) => { setText(event.target.value); if (error) setError('') }} onKeyDown={handleKeyDown} placeholder="적고 Enter를 누르면 메모지가 돼요" aria-describedby={error ? 'idea-error' : 'idea-help'} rows={2} />
         <div className="composer-controls">
-          <span id="idea-help" className="char-count">{text.length}/{MAX_IDEA_LENGTH}</span>
-          <button className="button secondary" type="button" onClick={onOpenBulk} disabled={saving || analyzing}>여러 개 입력</button>
-          <button className="button primary" type="button" onClick={() => void submit()} disabled={saving || analyzing}>{saving ? '추가 중…' : '아이디어 추가'}</button>
+          <span id="idea-help" className="composer-help"><kbd>Enter</kbd> 메모지로 붙이기 <kbd>Shift + Enter</kbd> 다음 줄</span>
+          <span className="char-count">{text.length}/{MAX_IDEA_LENGTH}</span>
+          <button className="button primary compact" type="button" onClick={() => void submit()} disabled={saving || analyzing}>{saving ? '붙이는 중…' : '메모지 붙이기'}</button>
         </div>
         {error ? <p id="idea-error" className="field-error" role="alert">{error}</p> : null}
       </div>

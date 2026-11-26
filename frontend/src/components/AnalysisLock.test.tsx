@@ -14,14 +14,14 @@ const idea: Idea = {
 describe('analysis interaction lock', () => {
   it('prevents new input while analysis is running', () => {
     render(<>
-      <BoardModeBar mode="cards" analyzing syncing={false} remoteEnabled onModeChange={vi.fn()} onAnalyze={vi.fn()} />
-      <IdeaComposer onAdd={vi.fn()} onOpenBulk={vi.fn()} analyzing />
+      <BoardModeBar mode="cards" hasAnalysis={false} analyzing syncing={false} remoteEnabled onModeChange={vi.fn()} onAnalyze={vi.fn()} onOpenBulk={vi.fn()} />
+      <IdeaComposer onAdd={vi.fn()} analyzing />
     </>)
 
     expect(screen.getByLabelText('새 아이디어')).toBeDisabled()
     expect(screen.getByRole('button', { name: '아이디어 분석 중' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '여러 개 입력' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '아이디어 추가' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '메모지 붙이기' })).toBeDisabled()
   })
 
   it('prevents card and group mutations while analysis is running', () => {
