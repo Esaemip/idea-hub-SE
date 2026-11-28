@@ -1,118 +1,141 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+import { fakeApi } from './fake-api'
+
+const draft = (page: Page) => page.getByLabel('새 메모')
+const note = (page: Page, text: string) => page.getByRole('button', { name: text, exact: true })
+const toolbar = (page: Page) => page.getByRole('toolbar', { name: '선택한 메모 도구' })
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => localStorage.clear())
-  await page.reload()
 })
 
-test('card CRUD, group move and reload persistence work together', async ({ page }) => {
-  const composer = page.getByLabel('새 아이디어')
-  await composer.fill('브라우저에서 만든 아이디어')
-  await composer.press('Enter')
-  await expect(page.getByRole('button', { name: '브라우저에서 만든 아이디어 수정' })).toBeVisible()
-
-  await page.getByRole('button', { name: '브라우저에서 만든 아이디어 수정' }).click()
-  await page.getByLabel('아이디어 수정').fill('수정된 브라우저 아이디어')
-  await page.getByRole('button', { name: '저장', exact: true }).click()
-  const card = page.getByRole('article').filter({ hasText: '수정된 브라우저 아이디어' })
-  await card.getByLabel('카드 그룹 이동').selectOption({ label: '화면 UI' })
-  await expect(card.getByText('고정')).toBeVisible()
-
+test('write on an empty board, edit, delete and keep it after a reload', async ({ page }) => {
+  const api = await fakeApi(page)
   await page.reload()
-  await expect(page.getByRole('button', { name: '수정된 브라우저 아이디어 수정' })).toBeVisible()
-  const persistedCard = page.getByRole('article').filter({ hasText: '수정된 브라우저 아이디어' })
-  await expect(persistedCard.getByLabel('카드 그룹 이동')).toHaveValue(/group-/)
+
+  await expect(page.getByLabel('빈 아이디어 보드')).toBeVisible()
+  await expect(draft(page)).toBeFocused()
+  await page.keyboard.type('메인 화면은 심플하게')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('검색 결과를 강조하기')
+  await page.keyboard.press('Shift+Enter')
+  await page.keyboard.type('찾은 낱말에 색 칠하기')
+  await page.keyboard.press('Enter')
+  await expect(note(page, '메인 화면은 심플하게')).toBeVisible()
+  await expect(note(page, '검색 결과를 강조하기\n찾은 낱말에 색 칠하기')).toBeVisible()
+  await expect(draft(page)).toBeFocused()
+
+  await note(page, '메인 화면은 심플하게').dblclick()
+  await page.getByLabel('메모 고치기').fill('메인 화면은 더 심플하게')
+  await page.keyboard.press('Enter')
+  await expect(note(page, '메인 화면은 더 심플하게')).toBeVisible()
 
   page.on('dialog', (dialog) => dialog.accept())
-  await persistedCard.getByLabel('아이디어 삭제').click()
-  await expect(page.getByText('수정된 브라우저 아이디어')).toHaveCount(0)
+  await note(page, '검색 결과를 강조하기\n찾은 낱말에 색 칠하기').click()
+  await toolbar(page).getByRole('button', { name: '삭제' }).click()
+  await expect(page.getByText('찾은 낱말에 색 칠하기')).toHaveCount(0)
+
+  await expect.poll(() => api.state.ideas.map((idea) => idea.text)).toEqual(['메인 화면은 더 심플하게'])
+  await page.reload()
+  await expect(note(page, '메인 화면은 더 심플하게')).toBeVisible()
 })
 
-test('bulk input, search and favorites update immediately', async ({ page }) => {
+test('double-click writes where the canvas was clicked and the spot is kept', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'double-click placement is a mouse interaction')
+  await fakeApi(page)
+  await page.reload()
+  await expect(draft(page)).toBeFocused()
+  await page.keyboard.press('Escape')
+
+  const canvas = page.getByRole('region', { name: '메모 캔버스' })
+  const box = (await canvas.boundingBox())!
+  await page.mouse.dblclick(box.x + 700 * 0.7, box.y + 500 * 0.7)
+  await expect(draft(page)).toBeFocused()
+  await page.keyboard.type('여기에 바로 적기')
+  await page.keyboard.press('Enter')
+  const placed = page.locator('[data-idea-id]').filter({ hasText: '여기에 바로 적기' })
+  await expect(placed).toHaveCSS('left', '692px')
+  await expect(placed).toHaveCSS('top', '480px')
+
+  await page.reload()
+  await expect(page.locator('[data-idea-id]').filter({ hasText: '여기에 바로 적기' })).toHaveCSS('left', '692px')
+})
+
+test('classify, rename a topic, move cards and keep the changes after a reload', async ({ page, isMobile }) => {
+  const api = await fakeApi(page)
+  await page.reload()
+  await expect(draft(page)).toBeFocused()
+  for (const text of ['버튼은 아이콘으로', '주제마다 색을 다르게', '검색 기능 추가', '적자마자 저장', '발표 날짜 확인']) {
+    await page.keyboard.type(text)
+    await page.keyboard.press('Enter')
+  }
+  await expect.poll(() => api.state.ideas.length).toBe(5)
+
+  await page.getByRole('button', { name: '분류하기' }).click()
+  await expect(page.getByText('비슷한 메모끼리 묶는 중이에요')).toBeVisible()
+  await expect(page.getByRole('region', { name: '주제별 분류' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '화면' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '미분류' })).toBeVisible()
+
+  await page.getByRole('button', { name: '화면 이름 고치기' }).click()
+  await page.getByLabel('주제 이름').fill('화면 UI')
+  await page.getByRole('button', { name: '저장', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '화면 UI' })).toBeVisible()
+
+  await note(page, '발표 날짜 확인').click()
+  await toolbar(page).getByRole('button', { name: '화면 UI' }).click()
+  await expect(page.getByRole('heading', { name: '미분류' })).toHaveCount(0)
+
+  if (!isMobile) {
+    await page.waitForTimeout(800) // let the moved note finish sliding into its row
+    const target = page.getByRole('region', { name: '주제별 분류' })
+    await page.locator('[data-idea-id]').filter({ hasText: '검색 기능 추가' }).dragTo(target, { targetPosition: { x: 300 * 0.7, y: 140 * 0.7 } })
+    await expect.poll(() => api.state.ideas.find((idea) => idea.text === '검색 기능 추가')?.assignment_is_manual).toBe(true)
+  }
+
+  await page.reload()
+  await page.getByRole('tab', { name: '분류' }).click()
+  await expect(page.getByRole('heading', { name: '화면 UI' })).toBeVisible()
+  await expect(note(page, '발표 날짜 확인').getByText('고정')).toBeVisible()
+  const screenGroup = api.state.groups.find((group) => group.name === '화면 UI')!
+  expect(screenGroup.name_is_manual).toBe(true)
+  expect(api.state.ideas.find((idea) => idea.text === '발표 날짜 확인')).toMatchObject({ group_id: screenGroup.id, assignment_is_manual: true })
+  expect(api.requests).toEqual(expect.arrayContaining([
+    expect.objectContaining({ method: 'POST', path: '/boards/1/analyze', body: {} }),
+    expect.objectContaining({ method: 'PATCH', path: `/boards/1/groups/${screenGroup.id}`, body: { name: '화면 UI' } }),
+  ]))
+})
+
+test('a failed analysis keeps the board and offers a retry', async ({ page }) => {
+  const api = await fakeApi(page, { analyzeStatus: 503 })
+  await page.reload()
+  await expect(draft(page)).toBeFocused()
+  await page.keyboard.type('그대로 남을 메모')
+  await page.keyboard.press('Enter')
+  await expect.poll(() => api.state.ideas.length).toBe(1)
+
+  await page.getByRole('button', { name: '분류하기' }).click()
+  const alert = page.getByRole('alert').filter({ hasText: '분류하지 못했어요' })
+  await expect(alert).toBeVisible()
+  await expect(alert.getByRole('button', { name: '다시 시도' })).toBeEnabled()
+  await expect(note(page, '그대로 남을 메모')).toBeVisible()
+  await expect(page.getByRole('tab', { name: '카드' })).toHaveAttribute('aria-selected', 'true')
+})
+
+test('bulk input and search highlight memos', async ({ page, isMobile }) => {
+  await fakeApi(page)
+  await page.reload()
+  if (isMobile) await page.getByRole('button', { name: '메뉴 보기' }).click()
   await page.getByRole('button', { name: '여러 개 입력' }).click()
   await page.getByLabel('아이디어 목록').fill('검색 대상 A\n검색 대상 B\n검색 대상 A')
   await expect(page.getByText('1개 중복 제외')).toBeVisible()
   await page.getByRole('button', { name: '2개 추가' }).click()
+  if (isMobile) await page.getByRole('button', { name: '메뉴 숨기기' }).click()
 
-  await page.getByPlaceholder('아이디어 찾기').fill('검색 대상 A')
-  await expect(page.getByText('1개 표시')).toBeVisible()
-  await page.getByLabel('즐겨찾기에 추가').click()
-  await page.getByRole('button', { name: '즐겨찾기', exact: true }).click()
-  await expect(page.getByRole('button', { name: '검색 대상 A 수정' })).toBeVisible()
-})
-
-test('group creation and rename work on a mobile viewport', async ({ page }) => {
-  await page.getByRole('button', { name: '분류' }).click()
-  await page.getByRole('button', { name: '새 그룹 만들기' }).click()
-  await page.getByLabel('그룹 이름').fill('모바일 그룹')
-  await page.getByRole('button', { name: '만들기' }).click()
-  await page.getByLabel('모바일 그룹 이름 수정').click()
-  await page.getByRole('textbox', { name: '그룹 이름', exact: true }).fill('변경된 모바일 그룹')
-  await page.getByLabel('그룹 이름 저장').click()
-  await expect(page.getByRole('heading', { name: '변경된 모바일 그룹' })).toBeVisible()
-})
-
-test('saved analysis and B3 manual changes survive server reloads', async ({ page }) => {
-  const requests: Array<{ method: string; url: string; body: unknown }> = []
-  const board = {
-    id: 1, title: '연동 보드', created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z',
-    groups: [{ id: 5, board_id: 1, name: 'AI 그룹', name_is_manual: false, created_at: '2026-11-25T01:00:00Z', updated_at: '2026-11-25T01:00:00Z' }],
-    ideas: [
-      { id: 7, board_id: 1, text: '분석 카드', group_id: 5, assignment_is_manual: false, analyzed_at: '2026-11-25T01:00:00Z', created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' },
-      { id: 8, board_id: 1, text: '미분류 카드', group_id: null as number | null, assignment_is_manual: false, analyzed_at: '2026-11-25T01:00:00Z', created_at: '2026-11-25T00:00:00Z', updated_at: '2026-11-25T01:00:00Z' },
-    ],
-  }
-  await page.route('**/boards/1**', async (route) => {
-    const request = route.request()
-    const url = request.url()
-    const body = request.postData() ? request.postDataJSON() as Record<string, unknown> : null
-    requests.push({ method: request.method(), url, body })
-    if (url.endsWith('/analyze')) {
-      await route.fulfill({ json: board })
-      return
-    }
-    if (url.endsWith('/groups/5')) {
-      board.groups[0].name = String(body?.name)
-      board.groups[0].name_is_manual = true
-      await route.fulfill({ json: board.groups[0] })
-      return
-    }
-    if (url.endsWith('/ideas/8/group')) {
-      board.ideas[1].group_id = Number(body?.group_id)
-      board.ideas[1].assignment_is_manual = true
-      await route.fulfill({ json: board.ideas[1] })
-      return
-    }
-    if (url.endsWith('/boards/1') && request.method() === 'GET') {
-      await route.fulfill({ json: board })
-      return
-    }
-    await route.abort()
-  })
-
-  await page.getByRole('button', { name: '아이디어 분석' }).click()
-  await expect(page.getByRole('heading', { name: 'AI 그룹' })).toBeVisible()
-  const unclassifiedCard = page.getByRole('article').filter({ hasText: '미분류 카드' })
-  await expect(unclassifiedCard.getByLabel('카드 그룹 이동')).toHaveValue('')
-
-  await page.getByLabel('서버에서 새로고침').click()
-  await expect(page.getByRole('heading', { name: 'AI 그룹' })).toBeVisible()
-  await expect(unclassifiedCard.getByLabel('카드 그룹 이동')).toHaveValue('')
-
-  await page.getByLabel('AI 그룹 이름 수정').click()
-  await page.getByRole('textbox', { name: '그룹 이름', exact: true }).fill('변경 그룹')
-  await page.getByLabel('그룹 이름 저장').click()
-  await unclassifiedCard.getByLabel('카드 그룹 이동').selectOption('server-group-5')
-  await page.getByLabel('서버에서 새로고침').click()
-
-  await expect(page.getByRole('heading', { name: '변경 그룹' })).toBeVisible()
-  await expect(page.getByRole('article').filter({ hasText: '미분류 카드' }).getByLabel('카드 그룹 이동')).toHaveValue('server-group-5')
-
-  await expect.poll(() => requests.filter((request) => request.method === 'PATCH').length).toBe(2)
-  expect(requests).toEqual(expect.arrayContaining([
-    expect.objectContaining({ method: 'POST', url: expect.stringMatching(/\/boards\/1\/analyze$/), body: {} }),
-    expect.objectContaining({ method: 'PATCH', url: expect.stringMatching(/\/boards\/1\/groups\/5$/), body: { name: '변경 그룹' } }),
-    expect.objectContaining({ method: 'PATCH', url: expect.stringMatching(/\/boards\/1\/ideas\/8\/group$/), body: { group_id: 5 } }),
-  ]))
+  await page.getByRole('button', { name: '메모 찾기' }).click()
+  await page.getByLabel('메모 찾기').fill('대상 B')
+  await expect(page.getByText('메모 1개 찾음')).toBeVisible()
+  await page.getByLabel('메모 찾기').fill('없는 낱말')
+  await expect(page.getByText('‘없는 낱말’와 맞는 메모가 없어요')).toBeVisible()
 })
