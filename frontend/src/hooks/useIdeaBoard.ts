@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { boardReducer, createGroup, createIdea, getGroupColor, mergeRemoteBoard } from '../domain/board'
 import { ApiError, createApiClient, type ApiClient } from '../services/api'
-import { loadBoard, saveBoard } from '../services/storage'
+import { loadBoard, loadServerBoardCache, saveBoard } from '../services/storage'
 import type { Idea, SyncState } from '../types'
+
+export type BoardLoadState = 'loading' | 'ready' | 'offline' | 'notfound'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() as string | undefined
 const configuredBoardId = Number(import.meta.env.VITE_BOARD_ID)
@@ -24,7 +26,7 @@ const defaultRemoteTaskMessages: RemoteTaskMessages = {
 }
 
 export const useIdeaBoard = () => {
-  const [board, dispatch] = useReducer(boardReducer, undefined, loadBoard)
+  const [board, dispatch] = useReducer(boardReducer, undefined, () => hasRemoteConfiguration ? loadServerBoardCache(configuredBoardId) : loadBoard())
   const [syncState, setSyncState] = useState<SyncState>('local')
   const [analyzing, setAnalyzing] = useState(false)
   const [syncMessage, setSyncMessage] = useState(hasRemoteConfiguration ? '서버 연결이 설정됐습니다. 필요할 때 최신 데이터를 불러오세요.' : '이 브라우저에 자동 저장됩니다.')
@@ -90,10 +92,11 @@ export const useIdeaBoard = () => {
     return succeeded
   }, [client])
 
-  const addIdeas = useCallback(async (texts: string[]) => {
+  const addIdeas = useCallback(async (texts: string[], onCreated?: (ideas: Idea[]) => void) => {
     if (analyzingRef.current) return
     const ideas = texts.map((text) => createIdea(text))
     dispatch({ type: 'ideas/add', ideas })
+    onCreated?.(ideas)
     await remoteTask(async (api) => {
       const requests = ideas.map((idea) => {
         const request = api.createIdea(idea.text).then((remote) => {
@@ -251,5 +254,24 @@ export const useIdeaBoard = () => {
     })
   }, [client, remoteTask])
 
-  return { board, syncState, syncMessage, remoteEnabled: Boolean(client), analyzing, addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, analyzeBoard, reloadRemote }
+  /** Load the configured server board when the screen opens. */
+  const openBoard = useCallback(async (): Promise<BoardLoadState> => {
+    if (!client) return 'ready'
+    setSyncState('syncing')
+    setSyncMessage('보드를 불러오는 중…')
+    try {
+      const remote = await client.loadBoard()
+      dispatch({ type: 'hydrate', board: mergeRemoteBoard(remote, boardRef.current) })
+      setSyncState('synced')
+      setSyncMessage('서버의 최신 보드를 불러왔습니다.')
+      return 'ready'
+    } catch (error) {
+      const notFound = error instanceof ApiError && error.status === 404
+      setSyncState('error')
+      setSyncMessage(notFound ? '이 보드를 찾을 수 없어요.' : error instanceof Error ? error.message : '서버에 연결할 수 없어요.')
+      return notFound ? 'notfound' : 'offline'
+    }
+  }, [client])
+
+  return { board, syncState, syncMessage, remoteEnabled: Boolean(client), analyzing, addIdeas, updateIdea, deleteIdea, toggleFavorite, moveIdea, addGroup, renameGroup, analyzeBoard, reloadRemote, openBoard }
 }

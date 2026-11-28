@@ -44,3 +44,15 @@ export const loadBoard = (): Board => {
 export const saveBoard = (board: Board): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(board))
 }
+
+/** Cached copy of a server board, or an empty board when the cache belongs to another board. */
+export const loadServerBoardCache = (serverId: number): Board => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const parsed: unknown = raw ? JSON.parse(raw) : null
+    if (isBoard(parsed) && parsed.serverId === serverId) return parsed
+  } catch {
+    // Fall through to an empty board; the server copy is loaded right after.
+  }
+  return { id: `server-board-${serverId}`, serverId, title: '아이디어 보드', groups: [], ideas: [], updatedAt: new Date(0).toISOString() }
+}
